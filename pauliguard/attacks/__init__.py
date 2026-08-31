@@ -10,6 +10,11 @@ from pauliguard.attacks.paired_pauli import (
     step3_qotp_letters_preserved,
     step4_density_matrices,
 )
+from pauliguard.attacks.repudiation import (
+    DisputeAnalyser,
+    DisputeFinding,
+    threat_model_gap_table,
+)
 
 __all__ = [
     "ForgeryWitness",
@@ -20,4 +25,7 @@ __all__ = [
     "step2_predicate_holds",
     "step3_qotp_letters_preserved",
     "step4_density_matrices",
+    "DisputeFinding",
+    "DisputeAnalyser",
+    "threat_model_gap_table",
 ]
