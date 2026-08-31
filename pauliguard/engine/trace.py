@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 from enum import Enum
+import hashlib
 import json
 from typing import Any
 
@@ -88,9 +89,13 @@ class Check:
     detail: dict = field(default_factory=dict)
 
 
+def key_fingerprint(name: str, material: Any) -> str:
+    return hashlib.sha256(repr((name, material)).encode()).hexdigest()[:16]
+
+
 @dataclass
 class Trace:
-    schema_version: str = "1.0"
+    schema_version: str = "1.1"
     scheme: str = ""
     n_message_qubits: int = 0
     run_id: str = ""
@@ -108,6 +113,7 @@ class Trace:
     message_out: list[int] = field(default_factory=list)
     accepted: bool = False
     assumed_fields: list[str] = field(default_factory=list)  # spec fields we had to assume
+    key_digests: dict[str, str] = field(default_factory=dict)
 
     def to_json(self, indent: int = 2) -> str:
         return json.dumps(asdict(self), indent=indent)
@@ -116,7 +122,7 @@ class Trace:
     def from_json(cls, s: str) -> Trace:
         data = json.loads(s)
         return cls(
-            schema_version=data.get("schema_version", "1.0"),
+            schema_version=data.get("schema_version", "1.1"),
             scheme=data.get("scheme", ""),
             n_message_qubits=data.get("n_message_qubits", 0),
             run_id=data.get("run_id", ""),
@@ -173,6 +179,7 @@ class Trace:
             message_out=data.get("message_out", []),
             accepted=data.get("accepted", False),
             assumed_fields=data.get("assumed_fields", []),
+            key_digests=data.get("key_digests", {}),
         )
 
     def decoy_measurements(self) -> list[Measurement]:
@@ -240,6 +247,13 @@ def validate(trace: Trace) -> list[str]:
             for key in getattr(s, "keys_used", []):
                 if key not in declared_keys:
                     issues.append(f"Step {s_idx} references undeclared key '{key}'")
+
+        # Key digests validation: if non-empty, every key in it must be declared in keys
+        key_digests = getattr(trace, "key_digests", {})
+        if isinstance(key_digests, dict) and key_digests:
+            for k_name in key_digests:
+                if k_name not in declared_keys:
+                    issues.append(f"key_digests references undeclared key '{k_name}'")
 
         # Measurement validation
         for m in getattr(trace, "measurements", []):

@@ -70,9 +70,9 @@ Substrate + headline claim + L0 + L1(Serfling). L2/L3 as interfaces + stubs. ~8h
 - [x] T1 Pauli/Clifford algebra over GF(2) — supervisor-verified vs explicit matrices
 - [x] T2 Encryption: QOTP + chained-CNOT — verified in pure numpy, contrast non-vacuous
 - [x] T3 HEADLINE CLAIM PROVEN + INDEPENDENTLY VERIFIED (see below)
-- [ ] T4 Frozen trace schema (contract between engine, detectors, UI)
-- [ ] T5 Stim-backed protocol engine + YAML spec loader
-- [ ] T6 L0 conformance detector (replay, unauthorized verification, key reuse)
+- [x] T4 Trace schema v1.1 (key_digests added) + validator
+- [x] T5 Stim engine + YAML spec loader + 3 specs discovered from disk
+- [x] T6 L0 conformance detector (bug found+fixed, see gotcha #5)
 - [ ] T7 L1 Serfling channel statistics (floor-relative τ)
 - [ ] T8 L2/L3 interfaces + stubs
 - [ ] T9 Validation gates + evaluation harness
@@ -99,3 +99,27 @@ Worker implemented; supervisor re-derived from scratch in pure numpy (`spike/ver
 - 120/256 keys flip the sign => the anticommuting instance the demo needs is real.
 Precise statement: the forged run is indistinguishable from an HONEST run on the MODIFIED
 message U|M>. That is exactly what makes the arbitrator accept.
+
+## Worker gotcha #4 (2026-08-31)
+gemini-3.7-flash-high tends to run pytest "in the background" and then stall waiting for it,
+eventually returning `Error: timeout waiting for response` — WHILE HAVING ALREADY WRITTEN
+CORRECT FILES. A timeout is NOT evidence of failure. Always check the disk and run the suite
+yourself before re-dispatching. Tell workers explicitly: run tests in the FOREGROUND, blocking.
+
+## Worker gotcha #5 — the bug independent audit caught (2026-08-31)
+L0 enforced single-use keys by key NAME. Every honest run legitimately declares the same names
+from the spec, so 399/400 honest runs were flagged L0.KEY_REUSE. The worker's own test passed
+because it used a FRESH ledger per run. Lesson: worker tests systematically test the happy path
+they just wrote. The supervisor's independent test must model the REALISTIC deployment shape
+(one ledger, many runs).
+FIX: trace schema v1.1 adds `key_digests` (sha256 fingerprint of key MATERIAL per run). L0 now
+flags reuse of (name, digest), never of name alone, and emits L0.NO_KEY_BINDING (warning) when
+a trace carries no key binding at all. Re-verified: 0 critical findings over 400 honest runs
+sharing one ledger, while force_key_reuse=True is still caught.
+
+## Serfling reference values (supervisor-derived, use to check L1)
+One-sided Serfling for sampling WITHOUT replacement, population N, sample k, deviation tau:
+    P(xbar - mu >= tau) <= exp( -2 k tau^2 / (1 - (k-1)/N) )
+At k=4096, N=16384, tau=0.03:  one-sided = 5.393e-5, two-sided = 1.079e-4 (~1.1e-4).
+Hoeffding two-sided at the same k,tau = 1.26e-3. Serfling is ~11.7x tighter, which matches the
+proposal's "about twelve times tighter" claim. Inversion: tau = sqrt(-ln(alpha)*(1-(k-1)/N)/(2k)).

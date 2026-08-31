@@ -12,6 +12,7 @@ from pauliguard.engine.trace import (
     RegisterDecl,
     Step,
     Trace,
+    key_fingerprint,
     validate,
 )
 
@@ -315,3 +316,35 @@ def test_message_changed():
     trace.message_in = [0, 1]
     trace.message_out = [0, 1, 0]
     assert trace.message_changed() is True
+
+
+def test_key_fingerprint_deterministic_and_distinct():
+    fp1 = key_fingerprint("k_AT", ((0, 1), (1, 0)))
+    fp2 = key_fingerprint("k_AT", ((0, 1), (1, 0)))
+    fp3 = key_fingerprint("k_AT", ((1, 1), (1, 0)))
+    fp4 = key_fingerprint("k_BT", ((0, 1), (1, 0)))
+
+    assert fp1 == fp2
+    assert fp1 != fp3
+    assert fp1 != fp4
+    assert len(fp1) == 16
+
+
+def test_validate_key_digests():
+    trace = make_valid_trace()
+    trace.key_digests = {"k_enc": "1234567890abcdef"}
+    assert validate(trace) == []
+
+    # Undeclared key in key_digests
+    trace.key_digests["k_ghost"] = "abcdef1234567890"
+    issues = validate(trace)
+    assert any("key_digests references undeclared key 'k_ghost'" in issue for issue in issues)
+
+
+def test_trace_with_key_digests_roundtrip():
+    trace = make_valid_trace()
+    trace.key_digests = {"k_enc": "1234567890abcdef", "k_auth": "fedcba0987654321"}
+    json_str = trace.to_json()
+    reconstructed = Trace.from_json(json_str)
+    assert reconstructed == trace
+    assert reconstructed.key_digests == trace.key_digests

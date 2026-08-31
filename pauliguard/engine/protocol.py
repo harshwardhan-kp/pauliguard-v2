@@ -38,6 +38,7 @@ from pauliguard.engine.trace import (
     RegisterDecl,
     Step,
     Trace,
+    key_fingerprint,
     validate,
 )
 
@@ -62,6 +63,7 @@ class RunConfig:
     attack: str | None = None              # None | "paired_pauli" | "unpaired_pauli" | "intercept_resend"
     attack_pauli: str = "X"              # letter applied to qubit 0 of the message copy
     key: tuple | None = None               # explicit key, else drawn from the CSPRNG
+    force_key_reuse: bool = False
 
 
 class ProtocolEngine:
@@ -95,7 +97,12 @@ class ProtocolEngine:
             nonce = secrets.token_hex(16)
 
         # 1. Draw the key
-        if cfg.key is not None:
+        if cfg.force_key_reuse:
+            if self.enc is not None:
+                key = (tuple(0 for _ in range(n)), tuple(0 for _ in range(n)))
+            else:
+                key = ()
+        elif cfg.key is not None:
             key: Any = cfg.key
         else:
             if self.enc is not None:
@@ -115,6 +122,21 @@ class ProtocolEngine:
             else k
             for k in self.spec.keys
         ]
+
+        # Populate key_digests for EVERY declared key
+        key_digests: dict[str, str] = {}
+        for k_decl in trace_keys:
+            k_name = k_decl.name
+            if cfg.force_key_reuse:
+                k_mat = ("FIXED_REUSED_KEY_MATERIAL", k_name)
+            elif cfg.key is not None and (k_name == "k_AT" or len(trace_keys) == 1):
+                k_mat = cfg.key
+            else:
+                if rng is not None:
+                    k_mat = (k_name, key, rng.bytes(16).hex())
+                else:
+                    k_mat = (k_name, key, secrets.token_hex(16))
+            key_digests[k_name] = key_fingerprint(k_name, k_mat)
 
         trace_registers = [
             RegisterDecl(
@@ -362,7 +384,7 @@ class ProtocolEngine:
         ]
 
         trace = Trace(
-            schema_version="1.0",
+            schema_version="1.1",
             scheme=self.spec.name,
             n_message_qubits=n,
             run_id=run_id,
@@ -380,6 +402,7 @@ class ProtocolEngine:
             message_out=message_out,
             accepted=accepted,
             assumed_fields=list(self.spec.assumed_fields),
+            key_digests=key_digests,
         )
 
         # 9. Validate trace before returning
@@ -404,6 +427,7 @@ def run_many(engine: ProtocolEngine, cfg: RunConfig, trials: int) -> list[Trace]
                 attack=cfg.attack,
                 attack_pauli=cfg.attack_pauli,
                 key=cfg.key,
+                force_key_reuse=cfg.force_key_reuse,
             )
         else:
             trial_cfg = cfg
