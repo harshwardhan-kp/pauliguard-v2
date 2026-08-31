@@ -120,6 +120,9 @@ sharing one ledger, while force_key_reuse=True is still caught.
 ## Serfling reference values (supervisor-derived, use to check L1)
 One-sided Serfling for sampling WITHOUT replacement, population N, sample k, deviation tau:
     P(xbar - mu >= tau) <= exp( -2 k tau^2 / (1 - (k-1)/N) )
-At k=4096, N=16384, tau=0.03:  one-sided = 5.393e-5, two-sided = 1.079e-4 (~1.1e-4).
-Hoeffding two-sided at the same k,tau = 1.26e-3. Serfling is ~11.7x tighter, which matches the
+At k=4096, N=16384, tau=0.03:  one-sided = 5.3834e-5, two-sided = 1.0767e-4 (~1.1e-4).
+Hoeffding one-sided at same k,tau = 6.2811e-4. Tightening factor = 11.667x.
+(Supervisor first wrote 5.393e-5/6.29e-4 from mental arithmetic; that was a rounding slip.
+ Recomputed values above are authoritative and match the proposal to the quoted precision.)
+Hoeffding two-sided at the same k,tau = 1.2562e-3, which matches the
 proposal's "about twelve times tighter" claim. Inversion: tau = sqrt(-ln(alpha)*(1-(k-1)/N)/(2k)).
