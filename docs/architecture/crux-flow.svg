@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="430" viewBox="0 0 2400 430" style="background-color: #FFFFFF; font-family: Inter, 'Helvetica Neue', Arial, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#12213F"/>
+    </marker>
+  </defs>
+
+  <!-- Canvas background -->
+  <rect width="2400" height="430" fill="#FFFFFF"/>
+
+  <!-- ==================== BLOCK 1: SPECIFY ==================== -->
+  <rect x="40" y="146" width="470" height="150" rx="14" fill="#FFFFFF" stroke="#12213F" stroke-width="2"/>
+  <circle cx="78" cy="181" r="17" fill="#12213F"/>
+  <text x="78" y="181" fill="#FFFFFF" font-size="19" font-weight="800" text-anchor="middle" dominant-baseline="central">1</text>
+  <text x="110" y="189" fill="#12213F" font-size="27" font-weight="800">SPECIFY</text>
+  <text x="110" y="219" fill="#3C4657" font-size="15">Protocol written as a YAML spec</text>
+  <text x="110" y="243" fill="#12213F" font-size="15" font-weight="700">adding a scheme = adding a file</text>
+
+  <!-- Arrow 1 -> 2 -->
+  <line x1="510" y1="140" x2="548" y2="140" stroke="#12213F" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- ==================== BLOCK 2: EXECUTE ==================== -->
+  <rect x="560" y="146" width="470" height="150" rx="14" fill="#FFFFFF" stroke="#12213F" stroke-width="2"/>
+  <circle cx="598" cy="181" r="17" fill="#12213F"/>
+  <text x="598" y="181" fill="#FFFFFF" font-size="19" font-weight="800" text-anchor="middle" dominant-baseline="central">2</text>
+  <text x="630" y="189" fill="#12213F" font-size="27" font-weight="800">EXECUTE</text>
+  <text x="630" y="219" fill="#3C4657" font-size="15">Honest run and attacked run, in lockstep</text>
+  <text x="630" y="243" fill="#12213F" font-size="15" font-weight="700">attack = ONE Pauli gate on ONE qubit</text>
+
+  <!-- Arrow 2 -> 3 -->
+  <line x1="1030" y1="140" x2="1068" y2="140" stroke="#12213F" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- ==================== BLOCK 3: FORGERY ACCEPTED ==================== -->
+  <rect x="1080" y="146" width="470" height="150" rx="14" fill="#FDF2F2" stroke="#B91C1C" stroke-width="2"/>
+  <circle cx="1118" cy="181" r="17" fill="#B91C1C"/>
+  <text x="1118" y="181" fill="#FFFFFF" font-size="19" font-weight="800" text-anchor="middle" dominant-baseline="central">3</text>
+  <text x="1150" y="189" fill="#B91C1C" font-size="27" font-weight="800">FORGERY ACCEPTED</text>
+  <text x="1150" y="219" fill="#3C4657" font-size="15">Signature ACCEPTED - message CHANGED</text>
+  <text x="1150" y="243" fill="#B91C1C" font-size="15" font-weight="700">probability 1.0</text>
+
+  <!-- ==================== FORK PATHS ==================== -->
+  <!-- Block 3 ends at x=1550. Connector runs to x=1600, then forks to Block 4 (y=125) and Block 5 (y=317) -->
+  <path d="M 1550 221 L 1600 221 C 1625 221 1635 125 1648 125" fill="none" stroke="#12213F" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M 1550 221 L 1600 221 C 1625 221 1635 317 1648 317" fill="none" stroke="#12213F" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <!-- ==================== BLOCK 4: STATISTICS SEE NOTHING ==================== -->
+  <rect x="1660" y="40" width="700" height="170" rx="14" fill="#FDF2F2" stroke="#B91C1C" stroke-width="2"/>
+  <circle cx="1698" cy="84" r="17" fill="#B91C1C"/>
+  <text x="1698" y="84" fill="#FFFFFF" font-size="19" font-weight="800" text-anchor="middle" dominant-baseline="central">4</text>
+  <text x="1730" y="92" fill="#B91C1C" font-size="27" font-weight="800">STATISTICS SEE NOTHING</text>
+  <text x="1730" y="124" fill="#3C4657" font-size="15">identical outcome distributions</text>
+  <text x="1730" y="148" fill="#3C4657" font-size="15">trace distance 0.000e+00</text>
+  <text x="2320" y="94" fill="#3C4657" font-size="12" font-weight="700" letter-spacing="1.5px" text-anchor="end">DETECTION RATE</text>
+  <text x="2320" y="152" fill="#B91C1C" font-size="62" font-weight="800" text-anchor="end">0.000</text>
+
+  <!-- ==================== BLOCK 5: ALGEBRA CATCHES IT ==================== -->
+  <rect x="1660" y="232" width="700" height="170" rx="14" fill="#EAF7EE" stroke="#15713D" stroke-width="2"/>
+  <circle cx="1698" cy="276" r="17" fill="#15713D"/>
+  <text x="1698" y="276" fill="#FFFFFF" font-size="19" font-weight="800" text-anchor="middle" dominant-baseline="central">5</text>
+  <text x="1730" y="284" fill="#15713D" font-size="27" font-weight="800">ALGEBRA CATCHES IT</text>
+  <text x="1730" y="316" fill="#3C4657" font-size="15">GF(2) nullspace -&gt; certificate</text>
+  <text x="1730" y="340" fill="#3C4657" font-size="15">confirmed by execution</text>
+  <text x="2320" y="286" fill="#3C4657" font-size="12" font-weight="700" letter-spacing="1.5px" text-anchor="end">DETECTION RATE</text>
+  <text x="2320" y="344" fill="#15713D" font-size="62" font-weight="800" text-anchor="end">1.000</text>
+
+  <!-- ==================== CAPTION ==================== -->
+  <text x="40" y="412" fill="#3C4657" font-size="15">
+    <tspan fill="#B91C1C" font-weight="700">Same measurement statistics. Different message.</tspan> The gap between block 4 and block 5 is the entire contribution.
+  </text>
+</svg>

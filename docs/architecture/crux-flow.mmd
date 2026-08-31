@@ -1,0 +1,16 @@
+flowchart LR
+
+    classDef neutral fill:#FFFFFF,stroke:#12213F,stroke-width:2px,color:#12213F
+    classDef alarm fill:#FDF2F2,stroke:#B91C1C,stroke-width:2px,color:#B91C1C
+    classDef win fill:#EAF7EE,stroke:#15713D,stroke-width:2px,color:#0B3D21
+
+    b1["<b>1 &middot; SPECIFY</b><br/>Protocol written as YAML spec<br/>adding a scheme = adding a file"]:::neutral
+    b2["<b>2 &middot; EXECUTE</b><br/>Honest and attacked runs in lockstep<br/>attack = ONE Pauli gate on ONE qubit"]:::neutral
+    b3["<b>3 &middot; FORGERY ACCEPTED</b><br/>Signature ACCEPTED &middot; message CHANGED<br/>probability 1.0"]:::alarm
+    b4["<b>4 &middot; STATISTICS SEE NOTHING</b><br/>identical outcome distributions<br/>trace distance 0.000e+00 &middot; <b>DETECTION 0.000</b>"]:::alarm
+    b5["<b>5 &middot; ALGEBRA CATCHES IT</b><br/>GF-2 nullspace &rarr; certificate<br/>confirmed by execution &middot; <b>DETECTION 1.000</b>"]:::win
+
+    b1 --> b2
+    b2 --> b3
+    b3 --> b4
+    b3 --> b5
