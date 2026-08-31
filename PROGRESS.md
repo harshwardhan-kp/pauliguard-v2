@@ -247,3 +247,21 @@ Browser-verified end to end (clicked the actual buttons):
 NOTE, state it if asked: removing the arbitrator check does NOT grow the malleability dimension,
 because at n=2 dim is already 4 = 2n, i.e. the whole Pauli group modulo phase. It is maximal and
 cannot grow. That is correct behaviour, not a bug.
+
+## SIH IDEA DECK — BUILT (2026-08-31)
+`deck/SIH26141_PauliGuard_Idea_Submission.pptx` (+ .pdf render), built from the OFFICIAL
+template at ~/Downloads/SIH2026-IDEA-Presentation-Format.pptx by `tools/build_deck.py`
+(re-runnable). 6 slides incl. title; template's instruction slide 7 deleted; section headings
+NEVER renamed (they are the scoring rubric).
+Follows ~/Claude/hackathon-decks/PHILOSOPHY.md: read-deck density, boxes not bullets,
+architecture diagram on slide 3, every benefit claim numbered + sourced, ONE figure enormous
+(0.000 at 72pt), named risks paired 1:1 with specific mitigations, team pill same position,
+references with DOIs, real UI screenshot (tools/capture_ui.py, re-runnable).
+OPEN ITEMS THE USER MUST RESOLVE BEFORE SUBMITTING:
+  1. Team ID and Team Name are placeholders "<your team ID>" / "<registered team name>".
+     A mismatch against the portal record is an unforced error.
+  2. THE GITHUB REPO IS PRIVATE. The slide-6 "PROOF OF LIFE" link is dead for a judge.
+     Make it public before submission or replace the link.
+  3. Density is 430 words/slide vs the corpus winner median of 131.8. Deliberate (read deck),
+     but slide 4 at 626 words is the outlier and is the one to trim if trimming.
+  4. Body text runs 8.6-9pt in places, below the 10pt floor PHILOSOPHY.md recommends.
