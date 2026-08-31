@@ -184,3 +184,17 @@ verification is hardest. Both escalated tasks landed correct.
    shrink and the attack disappear).
 4. Chained-CNOT with a permutation key to reproduce the published 1/(8n) bound.
 5. Optional: SIH 6-slide deck (user has not requested it).
+
+## R2 and R3 RESOLVED from the OFFICIAL problem statement (2026-08-31)
+User supplied the official SIH26141 PS text from the portal.
+- **R3 RESOLVED**: official text is VERBATIM IDENTICAL to the community-archive copy the whole
+  project was built on. 326 words each; the only difference is trailing periods on the section
+  headers. Archived at `docs/ps/official_sih26141.txt`. Every design decision stands.
+  The placeholder `Add 'Delivery Table (Expected Deliverables)' here` is CONFIRMED PRESENT in
+  the official PS, so the inferred-deliverables table is a verified credibility play.
+- **R2 RESOLVED**: `Dataset Link: Public/Open`. There is NO proprietary dataset and NO reference
+  implementation from Egreen Quanta. Consequence: external validation cannot come from sponsor
+  data, so it must come from published attack success probabilities and fixed physical constants
+  (CHSH 2sqrt2, intercept-resend QBER 0.25, teleportation benchmark 2/3). That is what we built.
+  Also: Youtube Link empty, Contact info empty, Department "Egreen Quanta", Category Software,
+  Theme "Blockchain & Cybersecurity".
