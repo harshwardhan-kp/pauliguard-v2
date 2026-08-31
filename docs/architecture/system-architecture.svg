@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1150" viewBox="0 0 1920 1150" style="background-color: #FFFFFF; font-family: Inter, 'Helvetica Neue', Arial, sans-serif;">
+  <defs>
+    <style>
+      .ink-head { font-weight: 800; fill: #FFFFFF; }
+      .sub-head { font-weight: 400; fill: #AFC0DC; }
+      .panel-title { font-size: 16px; font-weight: 700; fill: #12213F; letter-spacing: 0.4px; }
+      .panel-sub { font-size: 11px; font-weight: 700; fill: #B91C1C; letter-spacing: 0.3px; }
+      .box-title { font-size: 13px; font-weight: 700; fill: #12213F; }
+      .box-title-hero { font-size: 13px; font-weight: 700; fill: #B91C1C; }
+      .box-title-hw { font-size: 13px; font-weight: 700; fill: #1D4ED8; }
+      .box-body { font-size: 11px; font-weight: 400; fill: #3C4657; }
+      .box-body-bold { font-size: 11px; font-weight: 700; fill: #12213F; }
+      .box-body-green { font-size: 11px; font-weight: 600; fill: #15713D; }
+      .box-body-red { font-size: 11px; font-weight: 600; fill: #B91C1C; }
+      .box-body-blue { font-size: 11px; font-weight: 600; fill: #1D4ED8; }
+      .box-body-muted { font-size: 11px; font-weight: 500; fill: #8A93A3; }
+      .box-built { fill: #EAF7EE; stroke: #15713D; stroke-width: 1.8; rx: 10px; }
+      .box-planned { fill: #F7F8FA; stroke: #8A93A3; stroke-width: 1.5; stroke-dasharray: 5 4; rx: 10px; }
+      .box-hero { fill: #FDF2F2; stroke: #B91C1C; stroke-width: 2.0; rx: 10px; }
+      .box-hw { fill: #EFF4FF; stroke: #1D4ED8; stroke-width: 1.8; rx: 10px; }
+      .panel-bg { fill: #FFFFFF; stroke: #D8DEE8; stroke-width: 1.5; rx: 12px; }
+      .panel-bg-hero { fill: #FFFFFF; stroke: #B91C1C; stroke-width: 2.0; rx: 12px; }
+      .panel-bg-hw { fill: #EFF4FF; stroke: #1D4ED8; stroke-width: 1.8; rx: 12px; }
+      .panel-bg-summary { fill: #F8FAFC; stroke: #D8DEE8; stroke-width: 1.5; rx: 12px; }
+      .arrow-line { stroke: #9AA3B2; stroke-width: 2; fill: none; }
+      .arrow-blue { stroke: #1D4ED8; stroke-width: 2; fill: none; }
+      .arrow-red { stroke: #B91C1C; stroke-width: 2; stroke-dasharray: 6 4; fill: none; }
+    </style>
+
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#9AA3B2"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1D4ED8"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#B91C1C"/>
+    </marker>
+  </defs>
+
+  <!-- TITLE BAR (y 0..76) -->
+  <rect x="0" y="0" width="1920" height="76" fill="#12213F"/>
+  <text x="36" y="34" class="ink-head" font-size="26">PAULIGUARD  ·  SYSTEM ARCHITECTURE</text>
+  <text x="36" y="58" class="sub-head" font-size="12">SIH26141 · Quantum-Inspired Cyber Threat Detection for Digital Signature Security</text>
+
+  <text x="1884" y="34" class="sub-head" font-size="12" font-weight="500" text-anchor="end">4 protocol schemes · 208 tests · 4 detection layers</text>
+  <text x="1884" y="56" fill="#FFFFFF" font-size="12" font-weight="600" text-anchor="end">solid = built and verified   ·   dashed = designed, not yet built</text>
+
+  <!-- TOP BAND: 5 NUMBERED COLUMN PANELS (y=100..600) -->
+
+  <!-- PANEL 1: PROTOCOL SPEC (x=28, w=340) -->
+  <rect x="28" y="100" width="340" height="500" class="panel-bg"/>
+  <text x="44" y="125" class="panel-title">1 · PROTOCOL SPEC</text>
+
+  <!-- P1 Box 1: YAML PROTOCOL SPECS -->
+  <rect x="44" y="140" width="308" height="80" class="box-built"/>
+  <text x="56" y="159" class="box-title">YAML PROTOCOL SPECS</text>
+  <text x="56" y="175" class="box-body">4 shipped: lu-2022 · li-chan-long-2009</text>
+  <text x="56" y="189" class="box-body">decoy-bb84-qds · lu-2022-hardened</text>
+  <text x="56" y="203" class="box-body-green">protocols are data, not code</text>
+
+  <!-- P1 Box 2: SPEC LOADER + VALIDATOR -->
+  <rect x="44" y="228" width="308" height="72" class="box-built"/>
+  <text x="56" y="248" class="box-title">SPEC LOADER + VALIDATOR</text>
+  <text x="56" y="266" class="box-body">discovered from disk at request time</text>
+  <text x="56" y="280" class="box-body">adding a scheme = adding a file</text>
+
+  <!-- P1 Box 3: assumed_fields REPORTER -->
+  <rect x="44" y="308" width="308" height="72" class="box-built"/>
+  <text x="56" y="328" class="box-title">assumed_fields REPORTER</text>
+  <text x="56" y="346" class="box-body">every field we had to assume is</text>
+  <text x="56" y="360" class="box-body">emitted as a deliverable</text>
+
+  <!-- P1 Box 4: LIVE BROWSER SPEC EDITOR -->
+  <rect x="44" y="388" width="308" height="72" class="box-built"/>
+  <text x="56" y="408" class="box-title">LIVE BROWSER SPEC EDITOR</text>
+  <text x="56" y="426" class="box-body">judge edits YAML, analysis re-runs</text>
+  <text x="56" y="440" class="box-body">no filesystem write</text>
+
+  <!-- P1 Box 5: LLM LITERATURE INGESTION -->
+  <rect x="44" y="468" width="308" height="84" class="box-planned"/>
+  <text x="56" y="488" class="box-title">LLM LITERATURE INGESTION</text>
+  <text x="56" y="506" class="box-body">paper PDF to candidate spec</text>
+  <text x="56" y="520" class="box-body">human verifies every field</text>
+  <text x="56" y="534" class="box-body-muted">UPSTREAM of the security boundary</text>
+
+  <!-- PANEL 2: EXECUTION ENGINES (x=396, w=300) -->
+  <rect x="396" y="100" width="300" height="500" class="panel-bg"/>
+  <text x="412" y="125" class="panel-title">2 · EXECUTION ENGINES</text>
+
+  <!-- P2 Box 1: TIER 1 · STIM STABILIZER -->
+  <rect x="412" y="140" width="268" height="74" class="box-built"/>
+  <text x="424" y="160" class="box-title">TIER 1 · STIM STABILIZER</text>
+  <text x="424" y="178" class="box-body">primary engine · exact for Clifford</text>
+  <text x="424" y="192" class="box-body-green">O(n^2), not 2^n</text>
+
+  <!-- P2 Box 2: TIER 2 · STATEVECTOR ORACLES -->
+  <rect x="412" y="222" width="268" height="74" class="box-built"/>
+  <text x="424" y="242" class="box-title">TIER 2 · STATEVECTOR ORACLES</text>
+  <text x="424" y="260" class="box-body">Qiskit Aer + from-scratch sim</text>
+  <text x="424" y="274" class="box-body">cross-check only, n &lt;= 10</text>
+
+  <!-- P2 Box 3: TIER 3 · SYMBOLIC GF(2) TABLEAU -->
+  <rect x="412" y="304" width="268" height="66" class="box-built"/>
+  <text x="424" y="324" class="box-title">TIER 3 · SYMBOLIC GF(2) TABLEAU</text>
+  <text x="424" y="342" class="box-body">no simulation - exact linear algebra</text>
+  <text x="424" y="356" class="box-body">closed-form symplectic propagation</text>
+
+  <!-- P2 Box 4: DENSITY-MATRIX BACKEND -->
+  <rect x="412" y="378" width="268" height="64" class="box-planned"/>
+  <text x="424" y="398" class="box-title">DENSITY-MATRIX BACKEND</text>
+  <text x="424" y="416" class="box-body">n &lt;= 13</text>
+  <text x="424" y="430" class="box-body">mixed states &amp; non-unitary noise</text>
+
+  <!-- P2 Box 5: PHOTONIC LOSSY CHANNEL -->
+  <rect x="412" y="450" width="268" height="74" class="box-planned"/>
+  <text x="424" y="470" class="box-title">PHOTONIC LOSSY CHANNEL</text>
+  <text x="424" y="488" class="box-body">NetSquid is the right tool</text>
+  <text x="424" y="502" class="box-body">today: abstract channel error</text>
+
+  <!-- PANEL 3: TRACE + 4 · ADVERSARY (x=724, w=300) -->
+  <rect x="724" y="100" width="300" height="500" class="panel-bg"/>
+  <text x="740" y="125" class="panel-title">3 · TRACE + 4 · ADVERSARY</text>
+
+  <!-- P3 Box 1: TRACE SCHEMA v1.1 (FROZEN) -->
+  <rect x="740" y="140" width="268" height="72" class="box-built"/>
+  <text x="752" y="160" class="box-title">TRACE SCHEMA v1.1 (FROZEN)</text>
+  <text x="752" y="178" class="box-body">the contract between engine,</text>
+  <text x="752" y="192" class="box-body">detectors and UI</text>
+
+  <!-- P3 Box 2: STRUCTURAL VALIDATOR -->
+  <rect x="740" y="220" width="268" height="72" class="box-built"/>
+  <text x="752" y="240" class="box-title">STRUCTURAL VALIDATOR</text>
+  <text x="752" y="258" class="box-body">step order · register lifetime</text>
+  <text x="752" y="272" class="box-body">key_digests bind key MATERIAL</text>
+
+  <!-- P3 Box 3: ADVERSARY HARNESS · 8 ATTACKS -->
+  <rect x="740" y="300" width="268" height="72" class="box-built"/>
+  <text x="752" y="320" class="box-title">ADVERSARY HARNESS · 8 ATTACKS</text>
+  <text x="752" y="338" class="box-body">paired-Pauli · unpaired control</text>
+  <text x="752" y="352" class="box-body">intercept-resend · replay · key-reuse</text>
+
+  <!-- P3 Box 4: DISPUTE SUITE -->
+  <rect x="740" y="380" width="268" height="80" class="box-built"/>
+  <text x="752" y="400" class="box-title">DISPUTE SUITE</text>
+  <text x="752" y="418" class="box-body">repudiation of origin + of receipt</text>
+  <text x="752" y="432" class="box-body">false allegation</text>
+  <text x="752" y="446" class="box-body-green">the 3 threats the PS does not name</text>
+
+  <!-- P3 Box 5: EXTENDED ADVERSARY -->
+  <rect x="740" y="468" width="268" height="74" class="box-planned"/>
+  <text x="752" y="488" class="box-title">EXTENDED ADVERSARY</text>
+  <text x="752" y="506" class="box-body">hash collisions · adaptive</text>
+  <text x="752" y="520" class="box-body">chosen-message key recovery</text>
+
+  <!-- PANEL 4: DETECTION LAYERS (HERO) (x=1052, w=380) -->
+  <rect x="1052" y="100" width="380" height="500" class="panel-bg-hero"/>
+  <text x="1068" y="123" class="panel-title">5 · DETECTION LAYERS</text>
+  <text x="1068" y="137" class="panel-sub">NO AI / NO ML ANYWHERE IN THIS PANEL</text>
+
+  <!-- P4 Box 1: L0 CONFORMANCE -->
+  <rect x="1068" y="144" width="348" height="80" class="box-built"/>
+  <text x="1080" y="163" class="box-title">L0 CONFORMANCE          [NO THRESHOLD]</text>
+  <text x="1080" y="179" class="box-body">deterministic predicate</text>
+  <text x="1080" y="193" class="box-body">replay 1.000 · key-reuse 1.000</text>
+  <text x="1080" y="207" class="box-body-green">false positives 0.000 by construction</text>
+
+  <!-- P4 Box 2: L1 CHANNEL STATISTICS -->
+  <rect x="1068" y="230" width="348" height="80" class="box-built"/>
+  <text x="1080" y="249" class="box-title">L1 CHANNEL STATISTICS   [SERFLING]</text>
+  <text x="1080" y="265" class="box-body">decoy error rate, floor-relative tau</text>
+  <text x="1080" y="279" class="box-body">intercept-resend 1.000</text>
+  <text x="1080" y="293" class="box-body-red">Pauli forgery 0.000  &lt;- structurally blind</text>
+
+  <!-- P4 Box 3: L2 ENTANGLEMENT -->
+  <rect x="1068" y="316" width="348" height="80" class="box-built"/>
+  <text x="1080" y="335" class="box-title">L2 ENTANGLEMENT         [AZUMA]</text>
+  <text x="1080" y="351" class="box-body">sampled Pauli stabilizer generators</text>
+  <text x="1080" y="365" class="box-body">resource substitution 1.000 at c=0.40</text>
+  <text x="1080" y="379" class="box-body-red">Pauli forgery 0.000  &lt;- resource untouched</text>
+
+  <!-- P4 Box 4: L3 ALGEBRAIC MALLEABILITY (HERO) -->
+  <rect x="1068" y="402" width="348" height="82" class="box-hero"/>
+  <text x="1080" y="421" class="box-title-hero">L3 ALGEBRAIC MALLEABILITY [NO THRESHOLD]</text>
+  <text x="1080" y="438" class="box-body">GF(2) symplectic nullspace search</text>
+  <text x="1080" y="452" class="box-body-red">Pauli forgery 1.000 + certificate</text>
+  <text x="1080" y="466" class="box-body-bold">sound, NOT complete</text>
+
+  <!-- P4 Box 5: L3+ FULL CLIFFORD GROUP -->
+  <rect x="1068" y="490" width="348" height="66" class="box-planned"/>
+  <text x="1080" y="510" class="box-title">L3+ FULL CLIFFORD GROUP</text>
+  <text x="1080" y="528" class="box-body">same linear algebra, larger search space</text>
+
+  <!-- PANEL 5: EVALUATION + 9 · SERVING (x=1460, w=432) -->
+  <rect x="1460" y="100" width="432" height="500" class="panel-bg"/>
+  <text x="1476" y="125" class="panel-title">7 · EVALUATION + 9 · SERVING</text>
+
+  <!-- P5 Box 1: CONFUSION MATRIX -->
+  <rect x="1476" y="140" width="400" height="72" class="box-built"/>
+  <text x="1488" y="160" class="box-title">CONFUSION MATRIX</text>
+  <text x="1488" y="178" class="box-body">per-attack x per-layer · Clopper-Pearson 95%</text>
+  <text x="1488" y="192" class="box-body-green">no aggregate accuracy figure, by design</text>
+
+  <!-- P5 Box 2: FALSE-POSITIVE CURVES vs NOISE -->
+  <rect x="1476" y="220" width="400" height="68" class="box-built"/>
+  <text x="1488" y="240" class="box-title">FALSE-POSITIVE CURVES vs NOISE</text>
+  <text x="1488" y="258" class="box-body-green">p = 0, 0.001, 0.01, 0.05 -&gt; FPR 0.000</text>
+
+  <!-- P5 Box 3: 6 VALIDATION GATES -->
+  <rect x="1476" y="296" width="400" height="68" class="box-built"/>
+  <text x="1488" y="316" class="box-title">6 VALIDATION GATES, EACH WITH A CONTROL</text>
+  <text x="1488" y="334" class="box-body">honest acceptance, attack success, FPR vs bound, TPR</text>
+  <text x="1488" y="348" class="box-body">each gate paired with a control so none passes vacuously</text>
+
+  <!-- P5 Box 4: EXTERNAL VALIDATION -->
+  <rect x="1476" y="372" width="400" height="72" class="box-built"/>
+  <text x="1488" y="392" class="box-title">EXTERNAL VALIDATION</text>
+  <text x="1488" y="410" class="box-body">Jacqmin-Lienardy arXiv:2603.19985</text>
+  <text x="1488" y="424" class="box-body">KCCC key conditions reproduced exactly</text>
+
+  <!-- P5 Box 5: FASTAPI BACKEND + OFFLINE UI -->
+  <rect x="1476" y="452" width="400" height="72" class="box-built"/>
+  <text x="1488" y="472" class="box-title">FASTAPI BACKEND + OFFLINE UI</text>
+  <text x="1488" y="490" class="box-body">/api/run · /api/compare · /api/analyse_spec</text>
+  <text x="1488" y="504" class="box-body-green">vanilla JS, no CDN, works with no network</text>
+
+  <!-- TOP BAND ARROWS -->
+  <line x1="368" y1="350" x2="396" y2="350" class="arrow-line" marker-end="url(#arrow)"/>
+  <line x1="696" y1="350" x2="724" y2="350" class="arrow-line" marker-end="url(#arrow)"/>
+  <line x1="1024" y1="350" x2="1052" y2="350" class="arrow-line" marker-end="url(#arrow)"/>
+  <line x1="1432" y1="350" x2="1460" y2="350" class="arrow-line" marker-end="url(#arrow)"/>
+
+  <!-- SECOND BAND: 3 PANELS (y=624..830) -->
+
+  <!-- PANEL 6: HARDENING (x=28, w=668) -->
+  <rect x="28" y="624" width="668" height="206" class="panel-bg"/>
+  <text x="44" y="648" class="panel-title">6 · HARDENING — we propose fixes, never new schemes</text>
+
+  <!-- P6 Box 1: SWAP-TEST VERIFIER -->
+  <rect x="44" y="662" width="204" height="152" class="box-built"/>
+  <text x="56" y="684" class="box-title">SWAP-TEST VERIFIER</text>
+  <text x="56" y="706" class="box-body">detects U with prob</text>
+  <text x="56" y="722" class="box-body-green">(1-overlap^2)/2 per copy</text>
+  <text x="56" y="744" class="box-body">one-sided error: never</text>
+  <text x="56" y="760" class="box-body-bold">rejects an honest signature</text>
+
+  <!-- P6 Box 2: HARDENED SPEC GENERATION -->
+  <rect x="260" y="662" width="204" height="152" class="box-built"/>
+  <text x="272" y="684" class="box-title">HARDENED SPEC GEN</text>
+  <text x="272" y="706" class="box-body-red">lu-2022 forgery 1.0000</text>
+  <text x="272" y="722" class="box-body-green">-&gt; hardened 0.0035</text>
+  <text x="272" y="744" class="box-body">analytic 2^-8 = 0.003906</text>
+  <text x="272" y="760" class="box-body-green" font-weight="700">· a 286x reduction</text>
+
+  <!-- P6 Box 3: CLASSICAL MAC OVER PLAINTEXT -->
+  <rect x="476" y="662" width="204" height="152" class="box-planned"/>
+  <text x="488" y="684" class="box-title">CLASSICAL MAC</text>
+  <text x="488" y="706" class="box-body">decoys on the</text>
+  <text x="488" y="722" class="box-body">undecoyed segment</text>
+  <text x="488" y="744" class="box-body">classical MAC over</text>
+  <text x="488" y="760" class="box-body">plaintext payload</text>
+
+  <!-- PANEL 7: HARDWARE CALIBRATION (x=724, w=708) -->
+  <rect x="724" y="624" width="708" height="206" class="panel-bg-hw"/>
+  <text x="740" y="648" class="panel-title" fill="#1D4ED8">8 · HARDWARE CALIBRATION</text>
+
+  <!-- P7 Box 1: IBM QUANTUM -->
+  <rect x="740" y="662" width="216" height="152" class="box-hw" fill="#FFFFFF"/>
+  <text x="752" y="684" class="box-title-hw">IBM QUANTUM</text>
+  <text x="752" y="702" class="box-body-bold">ibm_kingston (Heron r2)</text>
+  <text x="752" y="724" class="box-body">entanglement +</text>
+  <text x="752" y="740" class="box-body">stabilizer-witness</text>
+  <text x="752" y="756" class="box-body">sub-circuit</text>
+
+  <!-- P7 Box 2: MEASURED ERROR FLOOR -->
+  <rect x="968" y="662" width="216" height="152" class="box-hw" fill="#FFFFFF"/>
+  <text x="980" y="684" class="box-title-hw">MEASURED ERROR FLOOR</text>
+  <text x="980" y="702" class="box-body-blue" font-weight="700">0.034424</text>
+  <text x="980" y="724" class="box-body">141 / 4096 shots ·</text>
+  <text x="980" y="740" class="box-body">job da8up31qtnsc73d0v7h0</text>
+  <text x="980" y="756" class="box-body-blue" font-weight="700">measured, not assumed</text>
+
+  <!-- P7 Box 3: REPLAYED FROM DISK -->
+  <rect x="1196" y="662" width="216" height="152" class="box-hw" fill="#FFFFFF"/>
+  <text x="1208" y="684" class="box-title-hw">REPLAYED FROM DISK</text>
+  <text x="1208" y="706" class="box-body">results + calibration</text>
+  <text x="1208" y="722" class="box-body">committed to the repo</text>
+  <text x="1208" y="744" class="box-body-bold">we never demo live</text>
+  <text x="1208" y="760" class="box-body-bold">from a queue</text>
+
+  <!-- PANEL 8: SCALE-OUT (x=1460, w=432) -->
+  <rect x="1460" y="624" width="432" height="206" class="panel-bg"/>
+  <text x="1476" y="648" class="panel-title">10 · SCALE-OUT (deployment target)</text>
+
+  <!-- P8 Stacked Planned Boxes (h=34 each) -->
+  <rect x="1476" y="662" width="400" height="34" class="box-planned"/>
+  <text x="1488" y="683" class="box-title" font-size="11.5">ASYNC JOB QUEUE + HORIZONTAL WORKERS</text>
+
+  <rect x="1476" y="702" width="400" height="34" class="box-planned"/>
+  <text x="1488" y="723" class="box-title" font-size="11.5">SCHEME CATALOGUE SERVICE · community specs</text>
+
+  <rect x="1476" y="742" width="400" height="34" class="box-planned"/>
+  <text x="1488" y="763" class="box-title" font-size="11.5">REVIEWER CLI + CI PLUGIN · screen a submitted scheme</text>
+
+  <rect x="1476" y="782" width="400" height="34" class="box-planned"/>
+  <text x="1488" y="803" class="box-title" font-size="11.5">PUBLIC RESULTS STORE · signed reproducible certificates</text>
+
+  <!-- CROSS-PANEL CONNECTIONS & FEEDBACK ARROWS -->
+
+  <!-- BLUE Arrow: Hardware Calibration -> L1 Channel Statistics -->
+  <path d="M 1076 662 L 1076 616 L 1038 616 L 1038 270 L 1066 270" class="arrow-blue" marker-end="url(#arrow-blue)"/>
+  <text x="1046" y="610" class="box-body-blue" font-weight="700">calibrates tau (floor-relative)</text>
+
+  <!-- RED Dashed Arrow: Hardened Spec -> Protocol Spec P1 -->
+  <path d="M 362 662 L 362 612 L 198 612 L 198 602" class="arrow-red" marker-end="url(#arrow-red)"/>
+  <text x="280" y="606" class="box-body-red" font-weight="700" text-anchor="middle">a fix is a spec edit</text>
+
+  <!-- GREY Arrow: P5 -> P8 (Scale-Out) -->
+  <line x1="1676" y1="600" x2="1676" y2="622" class="arrow-line" marker-end="url(#arrow)"/>
+  <text x="1684" y="615" class="box-body-muted" font-weight="600">scale-out</text>
+
+  <!-- SUMMARY PANEL: KEY GUARANTEES & FORMAL INVARIANTS (y=850..1040) -->
+  <rect x="28" y="850" width="1864" height="190" class="panel-bg-summary"/>
+  <text x="44" y="876" class="panel-title">FORMAL SECURITY PROPERTIES · DERIVED BOUNDS, NO TUNED CONSTANTS</text>
+  <text x="1876" y="876" font-size="12" font-weight="500" fill="#64748B" text-anchor="end">Non-asymptotic concentration bounds + exact symplectic GF(2) linear algebra</text>
+
+  <!-- Summary Card 1: Statistical Bounds -->
+  <rect x="44" y="892" width="446" height="132" class="box-built" fill="#FFFFFF"/>
+  <text x="56" y="912" class="box-title" fill="#15713D">1 · CONCENTRATION TAIL BOUNDS</text>
+  <text x="56" y="932" class="box-body">· L1 Decoy testing: Serfling bound for sampling w/o replacement</text>
+  <text x="56" y="950" class="box-body">· L2 Entanglement verification: Azuma-Hoeffding martingales</text>
+  <text x="56" y="968" class="box-body">· Hardware calibrated noise floor: 0.034424 on ibm_kingston</text>
+  <text x="56" y="986" class="box-body-green">· Floor-relative tau bounds the FPR by alpha; measured 0.000 at p&#8804;0.05</text>
+
+  <!-- Summary Card 2: L3 Malleability -->
+  <rect x="506" y="892" width="446" height="132" class="box-hero" fill="#FFFFFF"/>
+  <text x="518" y="912" class="box-title-hero">2 · SYMPLECTIC MALLEABILITY (L3)</text>
+  <text x="518" y="932" class="box-body">· GF(2) symplectic nullspace search over commutation matrices</text>
+  <text x="518" y="950" class="box-body">· Synthesizes Pauli frame shifts and forged operator substitutions</text>
+  <text x="518" y="968" class="box-body">· L3 detects paired-Pauli 1.000; L1 and L2 detect it 0.000</text>
+  <text x="518" y="986" class="box-body-red">· Generates standalone verifiable algebraic attack certificates</text>
+
+  <!-- Summary Card 3: Hardening Loop -->
+  <rect x="968" y="892" width="446" height="132" class="box-built" fill="#FFFFFF"/>
+  <text x="980" y="912" class="box-title" fill="#15713D">3 · CLOSED-LOOP SPEC HARDENING</text>
+  <text x="980" y="932" class="box-body">· Proposes concrete fixes, never invents non-standard protocols</text>
+  <text x="980" y="950" class="box-body">· SWAP-test detection modelled analytically per copy</text>
+  <text x="980" y="968" class="box-body">· 286x empirical reduction in forgery rate (1.0000 -&gt; 0.0035)</text>
+  <text x="980" y="986" class="box-body-green">· Analytic bound 2^-8 = 0.003906 reproduced in verification</text>
+
+  <!-- Summary Card 4: Verification & Reproducibility -->
+  <rect x="1430" y="892" width="446" height="132" class="box-hw" fill="#FFFFFF"/>
+  <text x="1442" y="912" class="box-title-hw">4 · EMPIRICAL REPRODUCIBILITY</text>
+  <text x="1442" y="932" class="box-body">· 208 test suite with paired controls across 6 validation gates</text>
+  <text x="1442" y="950" class="box-body">· External validation against Jacqmin-Lienardy (arXiv:2603.19985)</text>
+  <text x="1442" y="968" class="box-body">· Stim stabilizer engine cross-checked against Qiskit Aer statevector</text>
+  <text x="1442" y="986" class="box-body-blue">· Offline-first FastAPI backend &amp; pure vanilla JS UI (zero CDN)</text>
+
+  <!-- FOOTER (y=1060..1130) -->
+  <line x1="28" y1="1055" x2="1892" y2="1055" stroke="#D8DEE8" stroke-width="1"/>
+
+  <!-- Legend: Built -->
+  <rect x="36" y="1080" width="28" height="16" class="box-built"/>
+  <text x="74" y="1093" class="box-title" font-size="12">BUILT · shipped, tested and independently verified</text>
+
+  <!-- Legend: Planned -->
+  <rect x="460" y="1080" width="28" height="16" class="box-planned"/>
+  <text x="498" y="1093" class="box-body-muted" font-size="12" font-weight="600">PLANNED · designed, not yet implemented</text>
+
+  <!-- Legend: Hardware -->
+  <rect x="830" y="1080" width="28" height="16" class="box-hw"/>
+  <text x="868" y="1093" class="box-title-hw" font-size="12">MEASURED ON QUANTUM HARDWARE</text>
+
+  <!-- Right Footer Quote -->
+  <text x="1884" y="1093" class="box-body" font-size="11" font-weight="500" text-anchor="end">L3 is sound, not complete: it finds attacks, it never certifies security.</text>
+
+</svg>

@@ -1,0 +1,145 @@
+flowchart LR
+
+    classDef built fill:#EAF7EE,stroke:#15713D,stroke-width:2px,color:#0B3D21
+    classDef planned fill:#F6F7F9,stroke:#8A93A3,stroke-width:1.5px,stroke-dasharray:5 4,color:#3C4350
+
+    subgraph SG_LEGEND ["LEGEND"]
+        leg_built["BUILT &middot; Shipped and Verified"]:::built
+        leg_planned["PLANNED &middot; Designed Architecture Target"]:::planned
+    end
+
+    subgraph SG1 ["1 &middot; PROTOCOL SPECIFICATION - protocols are data, not code"]
+        spec_yaml["YAML Spec Files<br/>4 shipped: lu-2022 &middot; li-chan-long-2009<br/>decoy-bb84-qds &middot; lu-2022-hardened"]:::built
+        spec_loader["Spec Loader &amp; Validator<br/>load_spec_from_string &middot; validate_spec"]:::built
+        spec_assumed["assumed_fields Reporter<br/>Every assumed field emitted as deliverable"]:::built
+        spec_editor["Live Browser Spec Editor<br/>POST /api/analyse_spec - no filesystem write"]:::built
+        spec_llm["LLM Literature-Ingestion Pipeline<br/>Paper PDF to candidate spec &middot; human-verified<br/>UPSTREAM OF THE SECURITY BOUNDARY"]:::planned
+    end
+
+    subgraph SG2 ["2 &middot; EXECUTION ENGINES - tiered"]
+        eng_t1["Tier 1 &middot; Stim Stabilizer Simulator<br/>Primary &middot; exact for Clifford &middot; O-n-sq"]:::built
+        eng_t2["Tier 2 &middot; Statevector Simulators<br/>Qiskit Aer &amp; from-scratch oracle &middot; n &le; 10"]:::built
+        eng_t3["Tier 3 &middot; Symbolic Tableau Layer<br/>GF-2 Pauli-Clifford &middot; exact linear algebra"]:::built
+        eng_dm["Density-Matrix Backend<br/>n &le; 13"]:::planned
+        eng_lossy["Photonic Lossy-Channel Plugin<br/>NetSquid integration &middot; abstract error"]:::planned
+    end
+
+    subgraph SG3 ["3 &middot; TRACE - frozen contract"]
+        tr_schema["Trace Schema v1.1 - JSON<br/>Contract between engine, detectors &amp; UI"]:::built
+        tr_val["Structural Validator<br/>Step order &middot; register lifetime &middot; key_digests"]:::built
+    end
+
+    subgraph SG4 ["4 &middot; ADVERSARY HARNESS - attacks as spec transforms"]
+        adv_std["Standard Attack Suite<br/>paired-Pauli forgery &middot; unpaired-Pauli control<br/>intercept-resend &middot; replay &middot; key-reuse"]:::built
+        adv_rep["Repudiation &amp; Dispute Suite<br/>repudiation of origin &middot; repudiation of receipt<br/>false allegation - 3 threats PS omits"]:::built
+        adv_ext["Extended Adversary Suite<br/>hash-collision &middot; adaptive chosen-message key recovery"]:::planned
+    end
+
+    subgraph SG5 ["5 &middot; DETECTION LAYERS - no AI-ML anywhere"]
+        det_l0["L0 Conformance<br/>Deterministic predicate &middot; NO THRESHOLD"]:::built
+        det_l1["L1 Channel Statistics<br/>Serfling bound &middot; floor-relative tau"]:::built
+        det_l2["L2 Entanglement Quality<br/>Sampled Pauli stabilizer generators &middot; Azuma bound"]:::built
+        det_l3["L3 Algebraic Malleability<br/>GF-2 symplectic nullspace &middot; NO THRESHOLD<br/>Emits certificate"]:::built
+        det_l3p["L3+ Full Clifford Extension<br/>Extension from Pauli to full Clifford group"]:::planned
+    end
+
+    subgraph SG6 ["6 &middot; HARDENING - we propose fixes, never new schemes"]
+        hard_swap["SWAP-Test Verifier<br/>Detects U with probability one minus overlap squared, halved, per copy"]:::built
+        hard_spec["Hardened Spec Generation<br/>hardening.swap_test block &middot; k copies"]:::built
+        hard_mac["Additional Hardening Options<br/>Classical MAC over plaintext &middot; decoys on undecoyed segment"]:::planned
+    end
+
+    subgraph SG7 ["7 &middot; EVALUATION &amp; VALIDATION"]
+        eval_conf["Confusion Matrix Analysis<br/>Per-attack x per-layer &middot; Clopper-Pearson 95% intervals"]:::built
+        eval_fp["False-Positive Curves<br/>False-positive curves vs channel noise"]:::built
+        eval_gates["6 Validation Gates<br/>Each gate paired with explicit control"]:::built
+        eval_ext["External Validation<br/>Jacqmin-Lienardy arXiv:2603.19985<br/>KCCC key conditions reproduced exactly"]:::built
+    end
+
+    subgraph SG8 ["8 &middot; HARDWARE CALIBRATION"]
+        hw_ibm["IBM Quantum ibm_kingston &middot; Heron r2<br/>Entanglement + stabilizer-witness sub-circuit"]:::built
+        hw_floor["Measured Error Floor<br/>141/4096 = 0.034424 &middot; job da8up31qtnsc73d0v7h0"]:::built
+        hw_replay["Disk Replay System<br/>Results committed &amp; REPLAYED FROM DISK<br/>Never demo live from a queue"]:::built
+    end
+
+    subgraph SG9 ["9 &middot; SERVING"]
+        srv_api["FastAPI Backend<br/>Endpoints: /api/run &middot; /api/compare<br/>/api/analyse_spec &middot; /api/certificate &middot; /api/evaluation"]:::built
+        srv_ui["Offline Vanilla-JS UI<br/>3 panels &middot; no CDN &middot; works with no network"]:::built
+        srv_ops["Serving Infrastructure<br/>Docker image &middot; CI regression gate &middot; multi-user store"]:::planned
+    end
+
+    subgraph SG10 ["10 &middot; SCALE-OUT - deployment target"]
+        scale_queue["Async Job Queue<br/>Horizontal analysis workers"]:::planned
+        scale_cat["Scheme Catalogue Service<br/>Community-contributed specs"]:::planned
+        scale_cli["Reviewer CLI &amp; CI Plugin<br/>Journal reviewer screens submitted scheme automatically"]:::planned
+        scale_store["Public Results Store<br/>Signed reproducible certificates"]:::planned
+    end
+
+    %% Flow: Specification to Engines
+    spec_llm -.->|candidate spec| spec_loader
+    spec_yaml --> spec_loader
+    spec_editor -->|in-memory spec| spec_loader
+    spec_loader --> spec_assumed
+    spec_loader --> eng_t1
+    spec_loader --> eng_t2
+    spec_loader --> eng_t3
+    spec_loader -.-> eng_dm
+    spec_loader -.-> eng_lossy
+
+    %% Flow: Engines to Trace
+    eng_t1 --> tr_schema
+    eng_t2 --> tr_schema
+    eng_t3 --> tr_schema
+    eng_dm -.-> tr_schema
+    eng_lossy -.-> tr_schema
+    tr_schema --> tr_val
+
+    %% Flow: Trace to Adversary
+    tr_val --> adv_std
+    tr_val --> adv_rep
+    tr_val -.-> adv_ext
+
+    %% Flow: Adversary to Detection
+    adv_std --> det_l0
+    adv_std --> det_l1
+    adv_std --> det_l2
+    adv_std --> det_l3
+    adv_rep --> det_l0
+    adv_rep --> det_l3
+    adv_ext -.-> det_l3p
+
+    %% Flow: Hardware Calibration to Detection L1
+    hw_ibm --> hw_floor
+    hw_floor --> hw_replay
+    hw_floor -->|calibrates tau - floor-relative| det_l1
+
+    %% Flow: Detection to Hardening and Feedback to Spec
+    det_l3 --> hard_swap
+    det_l2 --> hard_swap
+    hard_swap --> hard_spec
+    hard_spec -->|proposes spec fix| spec_loader
+    hard_mac -.-> hard_spec
+
+    %% Flow: Detection to Evaluation and Serving
+    det_l0 --> eval_conf
+    det_l1 --> eval_conf
+    det_l2 --> eval_conf
+    det_l3 --> eval_conf
+    det_l1 --> eval_fp
+    det_l2 --> eval_gates
+    det_l3 --> eval_ext
+    det_l3 -->|certificate| srv_api
+
+    %% Flow: Evaluation to Serving
+    eval_conf --> srv_api
+    eval_fp --> srv_api
+    eval_gates --> srv_api
+    eval_ext --> srv_api
+
+    %% Flow: Serving Internal & Scale-Out
+    srv_api --> srv_ui
+    srv_api -.-> srv_ops
+    srv_api -.-> scale_queue
+    srv_api -.-> scale_cat
+    srv_api -.-> scale_cli
+    srv_api -.-> scale_store
