@@ -21,8 +21,8 @@ def all_specs() -> dict[str, SchemeSpec]:
 
 
 def test_real_specs_analyse_never_raises(all_specs: dict[str, SchemeSpec]):
-    """1. For each of the three real specs, analyse() runs without raising and returns a list."""
-    assert len(all_specs) == 3
+    """1. For each of the real specs, analyse() runs without raising and returns a list."""
+    assert len(all_specs) >= 3
     for name, spec in all_specs.items():
         analyser = DisputeAnalyser(spec)
         findings = analyser.analyse()

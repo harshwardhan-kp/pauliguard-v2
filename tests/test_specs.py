@@ -20,11 +20,11 @@ def all_specs() -> dict[str, SchemeSpec]:
     return discover_specs(SPECS_DIR)
 
 
-def test_discover_specs_finds_exactly_three(all_specs: dict[str, SchemeSpec]):
-    """1. discover_specs finds exactly 3 specs and their names match the filenames."""
-    assert len(all_specs) == 3
+def test_discover_specs_finds_all_specs(all_specs: dict[str, SchemeSpec]):
+    """1. discover_specs finds all specs and their names match the filenames."""
+    assert len(all_specs) == 4
 
-    expected_names = {"lu-2022", "li-chan-long-2009", "decoy-bb84-qds"}
+    expected_names = {"lu-2022", "li-chan-long-2009", "decoy-bb84-qds", "lu-2022-hardened"}
     assert set(all_specs.keys()) == expected_names
 
     for name, spec in all_specs.items():

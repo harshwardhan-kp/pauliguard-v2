@@ -37,6 +37,9 @@ class SchemeSpec:
     claims: list[str]  # security goals the scheme ASSERTS
     assumed_fields: list[str]  # fields we had to assume; a deliverable
     source_path: str
+    hardening: dict = field(
+        default_factory=lambda: {"swap_test": {"enabled": False, "copies": 0}}
+    )
 
     def procedures(self) -> dict[Procedure, list[StepSpec]]:
         """Group steps by procedure, preserving step order."""
@@ -56,6 +59,21 @@ class SchemeSpec:
             except (ValueError, KeyError):
                 return False
         return any(step.procedure == p for step in self.steps)
+
+    def swap_test_copies(self) -> int:
+        """Return the number of SWAP test copies if enabled, or 0 when disabled."""
+        if not isinstance(self.hardening, dict):
+            return 0
+        swap_test = self.hardening.get("swap_test")
+        if not isinstance(swap_test, dict):
+            return 0
+        if not swap_test.get("enabled", False):
+            return 0
+        try:
+            copies = int(swap_test.get("copies", 0))
+            return copies if copies > 0 else 0
+        except (ValueError, TypeError):
+            return 0
 
 
 def load_spec(path: str | Path) -> SchemeSpec:
@@ -151,6 +169,24 @@ def load_spec(path: str | Path) -> SchemeSpec:
         else []
     )
 
+    raw_hardening = data.get("hardening")
+    hardening: dict[str, Any] = {"swap_test": {"enabled": False, "copies": 0}}
+    if isinstance(raw_hardening, dict):
+        st = raw_hardening.get("swap_test")
+        if isinstance(st, dict):
+            try:
+                copies_val = int(st.get("copies", 0))
+            except (ValueError, TypeError):
+                copies_val = st.get("copies")
+            hardening = {
+                "swap_test": {
+                    "enabled": bool(st.get("enabled", False)),
+                    "copies": copies_val,
+                }
+            }
+        else:
+            hardening = dict(raw_hardening)
+
     return SchemeSpec(
         name=name,
         citation=citation,
@@ -164,6 +200,7 @@ def load_spec(path: str | Path) -> SchemeSpec:
         claims=claims,
         assumed_fields=assumed_fields,
         source_path=str(p),
+        hardening=hardening,
     )
 
 
@@ -276,6 +313,18 @@ def validate_spec(spec: SchemeSpec) -> list[str]:
                             issues.append(
                                 f"Step {i} ('{s_name}') references undeclared key '{key}'"
                             )
+
+        # 8. Check hardening
+        hardening = getattr(spec, "hardening", None)
+        if isinstance(hardening, dict):
+            swap_test = hardening.get("swap_test")
+            if isinstance(swap_test, dict):
+                if swap_test.get("enabled", False):
+                    copies = swap_test.get("copies")
+                    if copies is None or not isinstance(copies, int) or copies < 1:
+                        issues.append(
+                            f"Hardening swap_test is enabled but copies is {copies} (must be >= 1)"
+                        )
 
     except Exception as exc:
         issues.append(f"Validation error: {exc}")

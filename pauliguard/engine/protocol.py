@@ -25,6 +25,11 @@ import numpy as np
 import stim
 
 from pauliguard.attacks.paired_pauli import predicate_holds
+from pauliguard.detectors.swap_test import (
+    detection_probability_k_copies,
+    swap_test_accept_probability,
+    swap_test_detect_probability,
+)
 from pauliguard.engine.encryption import ChainedCNOT, Encryption, Key, QOTP
 from pauliguard.engine.pauli import Pauli
 from pauliguard.engine.spec_loader import SchemeSpec
@@ -279,12 +284,25 @@ class ProtocolEngine:
         msg_state_vec = np.zeros(2**n, dtype=np.complex128)
         msg_state_vec[msg_state_idx] = 1.0
 
+        k_copies = self.spec.swap_test_copies()
+
         if cfg.attack is None:
             honest = True
             attack_label = None
             message_out = list(message_in)
             arbitrator_passed = True
             check_detail: dict[str, Any] = {}
+            if k_copies > 0:
+                # One-sided error property: on honest runs SWAP test must NEVER reject
+                assert swap_test_accept_probability(msg_state_vec, msg_state_vec) == 1.0
+                swap_test_passed = True
+                swap_test_detail = {
+                    "p_detect": 0.0,
+                    "k": k_copies,
+                    "analytic_detection_probability": 0.0,
+                    "p_detect_k": 0.0,
+                    "detected": False,
+                }
         elif cfg.attack == "paired_pauli":
             honest = False
             attack_label = "paired_pauli"
@@ -309,6 +327,24 @@ class ProtocolEngine:
                 "U": U.to_string(),
                 "V": V.to_string(),
             }
+
+            if k_copies > 0:
+                p_detect = swap_test_detect_probability(msg_state_vec, U)
+                p_detect_k = detection_probability_k_copies(msg_state_vec, U, k_copies)
+                if rng is not None:
+                    detected = bool(rng.random() < p_detect_k)
+                else:
+                    detected = bool(secrets.randbelow(1_000_000) < (p_detect_k * 1_000_000))
+                if detected:
+                    arbitrator_passed = False
+                swap_test_passed = not detected
+                swap_test_detail = {
+                    "p_detect": float(p_detect),
+                    "k": int(k_copies),
+                    "analytic_detection_probability": float(p_detect_k),
+                    "p_detect_k": float(p_detect_k),
+                    "detected": bool(detected),
+                }
         elif cfg.attack == "unpaired_pauli":
             honest = False
             attack_label = "unpaired_pauli"
@@ -339,12 +375,42 @@ class ProtocolEngine:
                 "U": U.to_string(),
                 "V": V.to_string(),
             }
+
+            if k_copies > 0:
+                p_detect = swap_test_detect_probability(msg_state_vec, U)
+                p_detect_k = detection_probability_k_copies(msg_state_vec, U, k_copies)
+                if rng is not None:
+                    detected = bool(rng.random() < p_detect_k)
+                else:
+                    detected = bool(secrets.randbelow(1_000_000) < (p_detect_k * 1_000_000))
+                if detected:
+                    arbitrator_passed = False
+                swap_test_passed = not detected
+                swap_test_detail = {
+                    "p_detect": float(p_detect),
+                    "k": int(k_copies),
+                    "analytic_detection_probability": float(p_detect_k),
+                    "p_detect_k": float(p_detect_k),
+                    "detected": bool(detected),
+                }
         elif cfg.attack == "intercept_resend":
             honest = False
             attack_label = "intercept_resend"
             message_out = list(message_in)
             arbitrator_passed = True
             check_detail = {"attack": "intercept_resend"}
+            if k_copies > 0:
+                U = Pauli.identity(n)
+                p_detect = swap_test_detect_probability(msg_state_vec, U)
+                p_detect_k = detection_probability_k_copies(msg_state_vec, U, k_copies)
+                swap_test_passed = True
+                swap_test_detail = {
+                    "p_detect": float(p_detect),
+                    "k": int(k_copies),
+                    "analytic_detection_probability": float(p_detect_k),
+                    "p_detect_k": float(p_detect_k),
+                    "detected": False,
+                }
         else:
             raise ValueError(f"Unknown attack type: '{cfg.attack}'")
 
@@ -375,6 +441,26 @@ class ProtocolEngine:
                 detail=check_detail,
             )
         ]
+
+        if k_copies > 0:
+            swap_step_idx = None
+            for s_i, s in enumerate(self.spec.steps):
+                if s.procedure == Procedure.VERIFY and (
+                    s.name == "trent_swap_test_equality" or "swap_test" in (s.name or "")
+                ):
+                    swap_step_idx = s_i
+                    break
+            if swap_step_idx is None:
+                swap_step_idx = verify_step_idx
+
+            checks.append(
+                Check(
+                    step=swap_step_idx,
+                    name="swap_test_equality",
+                    passed=swap_test_passed,
+                    detail=swap_test_detail,
+                )
+            )
 
         # 8. Set trace properties
         accepted = all(c.passed for c in checks)

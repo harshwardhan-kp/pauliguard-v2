@@ -198,3 +198,21 @@ User supplied the official SIH26141 PS text from the portal.
   (CHSH 2sqrt2, intercept-resend QBER 0.25, teleportation benchmark 2/3). That is what we built.
   Also: Youtube Link empty, Contact info empty, Department "Egreen Quanta", Category Software,
   Theme "Blockchain & Cybersecurity".
+
+## SWAP-TEST FIX DEMO — COMPLETE (2026-08-31)
+The counterpart to every other layer: this one shows the attack DISAPPEARING when the protocol
+is repaired. Turns a defensive Q&A answer into an offensive one.
+- `pauliguard/detectors/swap_test.py`: accept prob (1+|<psi|phi>|^2)/2, detect prob
+  (1-|<psi|U|psi>|^2)/2, k-copy law 1-(1-p)^k. Supervisor verified the closed form against the
+  ACTUAL H-CSWAP-H circuit to 6.66e-16.
+- `pauliguard/specs/lu-2022-hardened.yaml`: same scheme plus a `hardening.swap_test` block
+  (copies: 8) and a SWAP-test VERIFY step. assumed_fields states explicitly that this is OUR
+  PROPOSED FIX, not the published protocol.
+- Engine honours `swap_test_copies()`: on an attacked run it draws detection at the analytic
+  rate and fails the equality check; on an HONEST run it NEVER rejects (one-sided error).
+MEASURED END TO END THROUGH THE ENGINE:
+  lu-2022           forgery succeeds  1.0000
+  lu-2022-hardened  forgery succeeds  0.0035   (analytic 2^-8 = 0.003906)  -> 286x reduction
+  honest acceptance on hardened       500/500 = 1.0000 (fix costs ZERO false rejections)
+  k sweep vs 2^-k: k=1 0.5045 | k=2 0.2515 | k=4 0.0565 | k=8 0.0035, all within 3 SE, monotonic
+  Z attack: no power, correctly, since <psi|Z|psi>=1 and Z does not change the message.
