@@ -75,9 +75,10 @@ Substrate + headline claim + L0 + L1(Serfling). L2/L3 as interfaces + stubs. ~8h
 - [x] T6 L0 conformance detector (bug found+fixed, see gotcha #5)
 - [x] T7 L1 Serfling channel statistics (floor-relative tau) — verified
 - [x] T8 L2 entanglement quality (REAL, not a stub)
-- [ ] T9 L3 algebraic malleability search
-- [ ] T9 Validation gates + evaluation harness
-- [ ] T10 Docs: reasoning.md, README, DEMO
+- [x] T9 L3 algebraic malleability search (REAL, certificates confirmed by execution)
+- [x] T10 Evaluation harness + confusion matrix (D7)
+- [x] T11 Docs: reasoning.md, README.md, DEMO.md
+- [x] T12 FastAPI backend + offline demo UI (browser-verified)
 
 ## Validation gates — nothing ships until ALL pass, each with a control
 1. Honest run accepted with probability exactly 1 at zero noise
@@ -145,3 +146,41 @@ adversary and must be stated, never hidden.
   L1 Serfling stats        0.0000 (theorem)             1.0000            -         -
   L2 entanglement          0.0000 (resource untouched)     -              -         -
   L3 algebraic             (to build) expected 1.0          -              -         -
+
+## SESSION COMPLETE — state as of 2026-08-31 (supervisor: Claude Opus 5)
+**167 tests passing. All 10 independent supervisor audit scripts passing.**
+Repo: https://github.com/harshwardhan-kp/pauliguard-v2 (PRIVATE)
+v1 at ~/Claude/pauliguard left UNTOUCHED as fallback.
+
+Delivered beyond the agreed definition of done (which was L2/L3 as stubs):
+  L0, L1, L2, L3 are ALL fully implemented and independently verified.
+  Plus: evaluation matrix (D7), FastAPI backend, offline demo UI, three docs.
+
+### Headline numbers (measured, reproducible)
+  forgery success probability          1.0    (12,852/12,852 rebuilt cases)
+  trace distance(forged, honest)       0.000e+00  (exactly zero)
+  TV distance over 40 random bases     0.000e+00
+  L1 TPR on paired_pauli               0.0000 at noise 0/.001/.01/.05  <- THE RESULT
+  L2 TPR on paired_pauli               0.0000 (resource untouched)
+  L3 TPR on paired_pauli               1.0000, certificate confirmed 16/16
+  L1 TPR on intercept_resend           1.0000
+  L0 TPR on replay / key_reuse         1.0000 / 1.0000
+  honest FPR, every layer              0.0000
+  L3 on decoy-bb84-qds (contrast)      0 certificates
+
+### Worker model policy used
+gemini-3.7-flash-high for everything except two escalations to
+claude-opus-4-6-thinking: L1 (Serfling derivation) and L3 (GF(2) symplectic search),
+because those are where a weaker model yields plausible-but-wrong output and
+verification is hardest. Both escalated tasks landed correct.
+
+### NEXT ACTIONS (in priority order) if work resumes
+1. Attacks for the three threats the PS omits: repudiation of origin, repudiation of
+   receipt, false allegation. This is the SECOND HALF of the headline finding and the
+   strongest remaining differentiator.
+2. The SWAP-test fix demo: add a SWAP test to a spec and show the attack rate drop to
+   (1 - |<psi|U|psi>|^2)/2. Turns a defensive Q&A answer into an offensive one.
+3. Live spec editing in the UI (add a classical MAC -> watch the malleability subspace
+   shrink and the attack disappear).
+4. Chained-CNOT with a permutation key to reproduce the published 1/(8n) bound.
+5. Optional: SIH 6-slide deck (user has not requested it).
