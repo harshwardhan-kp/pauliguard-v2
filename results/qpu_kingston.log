@@ -1,0 +1,12 @@
+qiskit_runtime_service._discover_account:WARNING:2026-08-29 01:46:04,969: Loading account with the given token. A saved account will not be used.
+submitted job_id=da8up31qtnsc73d0v7h0 backend=ibm_kingston
+{
+  "backend": "ibm_kingston",
+  "shots": 4096,
+  "counts": {
+    "0": 3955,
+    "1": 141
+  },
+  "error_floor": 0.034423828125,
+  "recorded": "2026-08-28T20:39:53.494188+00:00"
+}

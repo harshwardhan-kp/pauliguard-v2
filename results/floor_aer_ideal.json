@@ -1,0 +1,9 @@
+{
+  "backend": "aer_ideal",
+  "shots": 4096,
+  "counts": {
+    "0": 4096
+  },
+  "error_floor": 0.0,
+  "recorded": "2026-08-28T20:15:49.878850+00:00"
+}
