@@ -67,9 +67,9 @@ Substrate + headline claim + L0 + L1(Serfling). L2/L3 as interfaces + stubs. ~8h
 ## Build queue
 - [x] R1 stabilizer spike (RESOLVED YES, cross-validated)
 - [x] Repo scaffold, venv, ported assets, secrets safe
-- [ ] T1 Pauli/Clifford algebra over GF(2) (symplectic rep + conjugation)
-- [ ] T2 Encryption models: QOTP + chained-CNOT, with conjugation law
-- [ ] T3 HEADLINE: probability-1 forgery + identical-density-matrix proof
+- [x] T1 Pauli/Clifford algebra over GF(2) — supervisor-verified vs explicit matrices
+- [x] T2 Encryption: QOTP + chained-CNOT — verified in pure numpy, contrast non-vacuous
+- [x] T3 HEADLINE CLAIM PROVEN + INDEPENDENTLY VERIFIED (see below)
 - [ ] T4 Frozen trace schema (contract between engine, detectors, UI)
 - [ ] T5 Stim-backed protocol engine + YAML spec loader
 - [ ] T6 L0 conformance detector (replay, unauthorized verification, key reuse)
@@ -85,3 +85,17 @@ Substrate + headline claim + L0 + L1(Serfling). L2/L3 as interfaces + stubs. ~8h
 4. L1 false-positive rate tracks the Serfling bound across a noise sweep
 5. L0/L3 emit ZERO false positives on honest runs of every scheme
 6. L1 true-positive rate on Attack A is 0.00 at EVERY noise level (a theorem, not a tuning result)
+
+## HEADLINE CLAIM — PROVEN AND INDEPENDENTLY VERIFIED (2026-08-31)
+Worker implemented; supervisor re-derived from scratch in pure numpy (`spike/verify_t3_independent.py`).
+- Arbitrator predicate satisfied in **12,852/12,852** independently rebuilt cases (worker's own
+  sweep: 17,136). Success probability is exactly **1.0**, asserted as `== 1.0`.
+- **max trace distance(forged, honest) = 0.000e+00** over the full key/Pauli/state sweep.
+  Trace distance zero is the STRONG form: no measurement — not a cleverer basis, not a
+  collective measurement across rounds — can separate the two executions. Gate 6 is a
+  THEOREM, not an empirical observation.
+- max total-variation distance over **40 random measurement bases = 0.000e+00**.
+- CONTROL: the unpaired attack is caught **252/252**, so the result is not vacuous.
+- 120/256 keys flip the sign => the anticommuting instance the demo needs is real.
+Precise statement: the forged run is indistinguishable from an HONEST run on the MODIFIED
+message U|M>. That is exactly what makes the arbitrator accept.
