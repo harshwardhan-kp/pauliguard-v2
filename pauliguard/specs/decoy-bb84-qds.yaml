@@ -1,0 +1,117 @@
+# Specification for Decoy-State BB84 Quantum Digital Signature (QDS) scheme.
+# Citation: Gottesman-Chuang lineage; decoy-state one-time-universal-hashing QDS.
+#
+# THE CONTRAST CASE:
+# This represents the deployed modern lineage. Security rests entirely on decoy-state
+# parameter estimation and information-theoretic universal hashing bounds, NOT on a
+# malleable quantum encryption. Nearly every transmission step is decoy-protected.
+# Consequently, the algebraic layer (Pauli/Clifford commutation analysis) is expected
+# to find NOTHING here — there is no malleable encryption layer to exploit.
+
+name: "decoy-bb84-qds"
+family: "decoy-state-qds"
+encryption: "none"
+n_message_qubits: 2
+citation: "Gottesman-Chuang lineage; decoy-state one-time-universal-hashing QDS."
+
+verifier_set:
+  - "Bob"
+
+keys:
+  - name: "k_hash"
+    bits: 128
+    reuse_policy: "single-use"
+
+registers:
+  - name: "msg"
+    qubits: 2
+    owner: "Alice"
+  - name: "sig_states"
+    qubits: 8
+    owner: "Alice"
+  - name: "decoy_states"
+    qubits: 8
+    owner: "Alice"
+
+steps:
+  # INIT PROCEDURE
+  - procedure: "INIT"
+    party: "Alice"
+    action: "send"
+    registers: ["decoy_states"]
+    keys_used: ["k_hash"]
+    decoy_protected: true
+    name: "qkd_decoy_distribution"
+    detail:
+      protocol: "decoy-state BB84"
+
+  - procedure: "INIT"
+    party: "Bob"
+    action: "measure"
+    registers: ["decoy_states"]
+    keys_used: []
+    decoy_protected: true
+    name: "bob_channel_parameter_estimation"
+    detail:
+      metric: "QBER and single-photon yield"
+
+  # SIGN PROCEDURE
+  - procedure: "SIGN"
+    party: "Alice"
+    action: "prepare"
+    registers: ["msg", "sig_states"]
+    keys_used: ["k_hash"]
+    decoy_protected: true
+    name: "prepare_hashed_signature_states"
+    detail:
+      hashing: "one-time universal hash"
+
+  - procedure: "SIGN"
+    party: "Alice"
+    action: "send"
+    registers: ["sig_states", "decoy_states"]
+    keys_used: []
+    decoy_protected: true
+    name: "alice_transmit_signature_and_decoys"
+    detail:
+      channel: "quantum"
+
+  # VERIFY PROCEDURE
+  - procedure: "VERIFY"
+    party: "Bob"
+    action: "check"
+    registers: ["decoy_states"]
+    keys_used: []
+    decoy_protected: true
+    name: "bob_decoy_serfling_check"
+    detail:
+      test: "Serfling channel bounds verification"
+
+  - procedure: "VERIFY"
+    party: "Bob"
+    action: "measure"
+    registers: ["sig_states"]
+    keys_used: ["k_hash"]
+    decoy_protected: true
+    name: "bob_measure_signature"
+    detail:
+      bases: "random conjugate bases"
+
+  - procedure: "VERIFY"
+    party: "Bob"
+    action: "accept"
+    registers: ["msg"]
+    keys_used: []
+    decoy_protected: false
+    name: "bob_threshold_acceptance"
+    detail:
+      decision: "statistical threshold test"
+
+claims:
+  - "unforgeability"
+  - "non_repudiation_origin"
+
+assumed_fields:
+  - "decoy intensity levels (signal, decoy, vacuum) and distribution probabilities"
+  - "statistical fluctuation bounds (Serfling finite-sample bound parameters)"
+  - "authenticated classical channel for basis reconciliation"

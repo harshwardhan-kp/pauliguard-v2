@@ -1,4 +1,11 @@
 from pauliguard.engine.pauli import Pauli, conjugate
+from pauliguard.engine.spec_loader import (
+    SchemeSpec,
+    StepSpec,
+    discover_specs,
+    load_spec,
+    validate_spec,
+)
 from pauliguard.engine.trace import (
     Action,
     Check,
@@ -21,8 +28,14 @@ __all__ = [
     "Pauli",
     "Procedure",
     "RegisterDecl",
+    "SchemeSpec",
     "Step",
+    "StepSpec",
     "Trace",
     "conjugate",
+    "discover_specs",
+    "load_spec",
     "validate",
+    "validate_spec",
 ]
+

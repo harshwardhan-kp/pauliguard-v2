@@ -1,0 +1,220 @@
+# Specification for Lu et al. (2022) Controlled Quantum Teleportation AQS scheme.
+# Citation: Lu, Li, Yu, Han. A verifiable arbitrated quantum signature scheme based on controlled quantum teleportation. Entropy 24, 111 (2022).
+#
+# CRITICAL VULNERABILITY LOCUS:
+# In the published scheme, transmission steps include decoy states, but the equality-check
+# segment comparing the decrypted signature and the message copy is NOT decoy protected.
+# That is precisely where the paired Pauli forgery attack operates undetected with probability 1.0.
+
+name: "lu-2022"
+family: "teleportation-aqs"
+encryption: "qotp"
+n_message_qubits: 2
+citation: "Lu, Li, Yu, Han. A verifiable arbitrated quantum signature scheme based on controlled quantum teleportation. Entropy 24, 111 (2022)."
+
+verifier_set:
+  - "Bob"
+  - "Trent"
+
+keys:
+  - name: "k_AT"
+    bits: 4
+    reuse_policy: "single-use"
+  - name: "k_BT"
+    bits: 4
+    reuse_policy: "single-use"
+
+registers:
+  - name: "msg"
+    qubits: 2
+    owner: "Alice"
+  - name: "msg_copy"
+    qubits: 2
+    owner: "Alice"
+  - name: "sig"
+    qubits: 2
+    owner: "Alice"
+  - name: "sig_TB"
+    qubits: 2
+    owner: "Trent"
+  - name: "resource_trent"
+    qubits: 5
+    owner: "Trent"
+  - name: "decoy_AT"
+    qubits: 2
+    owner: "Alice"
+  - name: "decoy_TB"
+    qubits: 2
+    owner: "Trent"
+  - name: "decoy_AB"
+    qubits: 2
+    owner: "Alice"
+  - name: "receipt"
+    qubits: 2
+    owner: "Bob"
+
+steps:
+  # INIT PROCEDURE
+  - procedure: "INIT"
+    party: "Trent"
+    action: "prepare"
+    registers: ["resource_trent"]
+    keys_used: []
+    decoy_protected: false
+    name: "prepare_entangled_resource"
+    detail:
+      state: "5-qubit stabilizer state |xi>"
+
+  - procedure: "INIT"
+    party: "Trent"
+    action: "send"
+    registers: ["resource_trent", "decoy_AT", "decoy_TB"]
+    keys_used: ["k_AT", "k_BT"]
+    decoy_protected: true
+    name: "distribute_resource_and_keys"
+    detail:
+      channel: "quantum"
+
+  # SIGN PROCEDURE
+  - procedure: "SIGN"
+    party: "Alice"
+    action: "prepare"
+    registers: ["msg", "msg_copy"]
+    keys_used: []
+    decoy_protected: false
+    name: "prepare_message_and_copy"
+    detail: {}
+
+  - procedure: "SIGN"
+    party: "Alice"
+    action: "apply"
+    registers: ["msg_copy", "sig"]
+    keys_used: ["k_AT"]
+    decoy_protected: false
+    name: "qotp_encrypt_signature"
+    detail:
+      encryption: "qotp"
+
+  - procedure: "SIGN"
+    party: "Alice"
+    action: "send"
+    registers: ["sig", "msg", "decoy_AT"]
+    keys_used: []
+    decoy_protected: true
+    name: "send_signature_to_trent"
+    detail:
+      channel: "quantum"
+
+  # VERIFY PROCEDURE
+  - procedure: "VERIFY"
+    party: "Trent"
+    action: "check"
+    registers: ["decoy_AT"]
+    keys_used: []
+    decoy_protected: true
+    name: "trent_check_decoys"
+    detail:
+      test: "decoy_parameter_estimation"
+
+  - procedure: "VERIFY"
+    party: "Trent"
+    action: "check"
+    registers: ["sig", "msg_copy"]
+    keys_used: ["k_AT"]
+    decoy_protected: false
+    name: "trent_verify_equality_predicate"
+    detail:
+      predicate: "E_{k_AT}|P> == |S>"
+      note: "Vulnerable equality-check segment without decoy protection"
+
+  - procedure: "VERIFY"
+    party: "Trent"
+    action: "send"
+    registers: ["sig_TB", "msg", "decoy_TB"]
+    keys_used: ["k_BT"]
+    decoy_protected: true
+    name: "trent_forward_to_bob"
+    detail:
+      channel: "quantum"
+
+  - procedure: "VERIFY"
+    party: "Bob"
+    action: "check"
+    registers: ["decoy_TB"]
+    keys_used: []
+    decoy_protected: true
+    name: "bob_check_decoys"
+    detail:
+      test: "decoy_parameter_estimation"
+
+  - procedure: "VERIFY"
+    party: "Bob"
+    action: "measure"
+    registers: ["sig_TB", "msg"]
+    keys_used: ["k_BT"]
+    decoy_protected: false
+    name: "bob_verify_signature"
+    detail:
+      verification: "k_BT decryption and measurement check"
+
+  - procedure: "VERIFY"
+    party: "Bob"
+    action: "accept"
+    registers: ["msg"]
+    keys_used: []
+    decoy_protected: false
+    name: "bob_accept_signature"
+    detail: {}
+
+  # PROOF_OF_ORIGIN PROCEDURE
+  - procedure: "PROOF_OF_ORIGIN"
+    party: "Trent"
+    action: "publish"
+    registers: ["sig"]
+    keys_used: ["k_AT"]
+    decoy_protected: false
+    name: "trent_publish_origin_evidence"
+    detail:
+      claim: "non_repudiation_origin"
+
+  - procedure: "PROOF_OF_ORIGIN"
+    party: "Bob"
+    action: "check"
+    registers: ["sig"]
+    keys_used: ["k_AT"]
+    decoy_protected: false
+    name: "bob_verify_origin"
+    detail: {}
+
+  # PROOF_OF_RECEIPT PROCEDURE
+  - procedure: "PROOF_OF_RECEIPT"
+    party: "Bob"
+    action: "send"
+    registers: ["receipt", "decoy_AB"]
+    keys_used: ["k_BT"]
+    decoy_protected: true
+    name: "bob_send_receipt"
+    detail:
+      channel: "quantum"
+
+  - procedure: "PROOF_OF_RECEIPT"
+    party: "Alice"
+    action: "check"
+    registers: ["receipt"]
+    keys_used: ["k_BT"]
+    decoy_protected: false
+    name: "alice_verify_receipt"
+    detail:
+      claim: "non_repudiation_receipt"
+
+claims:
+  - "unforgeability"
+  - "non_repudiation_origin"
+  - "non_repudiation_receipt"
+  - "no_false_allegation"
+
+assumed_fields:
+  - "key length policy on reuse"
+  - "dispute-resolution procedure detail"
+  - "whether state-equality is tested by SWAP test or assumed"
+  - "equality-check segment between signature and message copy is not decoy protected in the published scheme (forgery locus)"
