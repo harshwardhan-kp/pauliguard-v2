@@ -1,0 +1,355 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 920" width="1200" height="920">
+  <defs>
+    <!-- QUANTUM PRIMITIVES (Semantic color: #12213F) -->
+    <!-- 1. ico-bell-pair -->
+    <symbol id="ico-bell-pair" viewBox="0 0 48 48">
+      <circle cx="10" cy="24" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="10" cy="24" r="1.75" fill="currentColor" stroke="none"/>
+      <circle cx="38" cy="24" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="38" cy="24" r="1.75" fill="currentColor" stroke="none"/>
+      <path d="M 16 24 C 18 16, 22 16, 24 24 C 26 32, 30 32, 32 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 2. ico-teleport -->
+    <symbol id="ico-teleport" viewBox="0 0 48 48">
+      <circle cx="9" cy="18" r="2.5" fill="currentColor" stroke="none"/>
+      <circle cx="39" cy="18" r="4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 12 17 C 17 8, 31 8, 34.5 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3" fill="none"/>
+      <path d="M 31 13 L 35 16 L 35 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 10 31 L 38 31 M 10 36 L 38 36" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 3. ico-pauli-x -->
+    <symbol id="ico-pauli-x" viewBox="0 0 48 48">
+      <path d="M 8 16 L 8 8 L 16 8 M 32 8 L 40 8 L 40 16 M 40 32 L 40 40 L 32 40 M 16 40 L 8 40 L 8 32" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 16 16 L 32 32 M 32 16 L 16 32" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 4. ico-pauli-z -->
+    <symbol id="ico-pauli-z" viewBox="0 0 48 48">
+      <rect x="8" y="8" width="32" height="32" rx="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 17 17 L 31 17 L 17 31 L 31 31" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 5. ico-pauli-group -->
+    <symbol id="ico-pauli-group" viewBox="0 0 48 48">
+      <rect x="6" y="6" width="20" height="20" rx="2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="14" y="14" width="20" height="20" rx="2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="22" y="22" width="20" height="20" rx="2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 6. ico-stabilizer -->
+    <symbol id="ico-stabilizer" viewBox="0 0 48 48">
+      <path d="M 22 8 L 34 15 L 34 29 L 22 36 L 10 29 L 10 15 Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 22 17 L 22 27 M 17 22 L 27 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 37 9 L 41 9 M 39 7 L 39 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 43.5 8 L 44.5 7 L 44.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 7. ico-measurement -->
+    <symbol id="ico-measurement" viewBox="0 0 48 48">
+      <rect x="6" y="8" width="36" height="32" rx="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 13 32 A 11 11 0 0 1 35 32" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 24 32 L 32 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="24" cy="32" r="1.75" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- 8. ico-qubit-register -->
+    <symbol id="ico-qubit-register" viewBox="0 0 48 48">
+      <path d="M 12 12 L 38 12 M 12 20 L 38 20 M 12 28 L 38 28 M 12 36 L 38 36" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="10" cy="12" r="2" fill="currentColor" stroke="none"/>
+      <circle cx="10" cy="20" r="2" fill="currentColor" stroke="none"/>
+      <circle cx="10" cy="28" r="2" fill="currentColor" stroke="none"/>
+      <circle cx="10" cy="36" r="2" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- 9. ico-entangle-break -->
+    <symbol id="ico-entangle-break" viewBox="0 0 48 48">
+      <circle cx="9" cy="24" r="5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="39" cy="24" r="5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 14 24 L 21 24 M 27 24 L 34 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 26 14 L 19 25 L 29 23 L 22 34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 10. ico-swap-test -->
+    <symbol id="ico-swap-test" viewBox="0 0 48 48">
+      <path d="M 8 12 L 40 12 M 8 26 L 40 26 M 8 38 L 40 38" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="24" cy="12" r="2.5" fill="currentColor" stroke="none"/>
+      <path d="M 24 12 L 24 38" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 20.5 22.5 L 27.5 29.5 M 27.5 22.5 L 20.5 29.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 20.5 34.5 L 27.5 41.5 M 27.5 34.5 L 20.5 41.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- MATHEMATICS AND STATISTICS (Semantic color: #15713D) -->
+    <!-- 11. ico-gf2-matrix -->
+    <symbol id="ico-gf2-matrix" viewBox="0 0 48 48">
+      <path d="M 11 9 L 7 9 L 7 39 L 11 39 M 37 9 L 41 9 L 41 39 L 37 39" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="13" y="13" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="21.5" y="13" width="5" height="5" rx="1" fill="currentColor" stroke="none"/>
+      <rect x="30" y="13" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="13" y="21.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="21.5" y="21.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="30" y="21.5" width="5" height="5" rx="1" fill="currentColor" stroke="none"/>
+      <rect x="13" y="30" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="21.5" y="30" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="30" y="30" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 12. ico-symplectic -->
+    <symbol id="ico-symplectic" viewBox="0 0 48 48">
+      <path d="M 24 6 L 42 24 L 24 42 L 6 24 Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="15" y="15" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 24 20 A 4 4 0 1 1 20 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 23 18 L 25 20 L 22 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 13. ico-nullspace -->
+    <symbol id="ico-nullspace" viewBox="0 0 48 48">
+      <path d="M 14 11 L 41 11 L 34 37 L 7 37 Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 16 26 L 31 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 27 20 L 31 22 L 28 25" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <ellipse cx="37" cy="33" rx="2.5" ry="3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 14. ico-threshold-curve -->
+    <symbol id="ico-threshold-curve" viewBox="0 0 48 48">
+      <path d="M 8 9 L 8 39 L 40 39" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 11 14 C 15 28, 23 34, 38 35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 7 24 L 41 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3" fill="none"/>
+    </symbol>
+
+    <!-- 15. ico-confidence-band -->
+    <symbol id="ico-confidence-band" viewBox="0 0 48 48">
+      <path d="M 10 24 L 38 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 10 13 L 10 35 M 38 13 L 38 35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="24" cy="24" r="3" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- 16. ico-sampling -->
+    <symbol id="ico-sampling" viewBox="0 0 48 48">
+      <path d="M 12 17 L 36 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 14 17 L 14 21 L 10 36 C 10 39, 13 40, 16 40 L 32 40 C 35 40, 38 39, 38 36 L 34 21 L 34 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="19" cy="33" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="29" cy="33" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="24" cy="9" r="3" fill="currentColor" stroke="none"/>
+      <path d="M 24 16 L 24 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 2" fill="none"/>
+    </symbol>
+
+    <!-- SECURITY AND PROCESS (Semantic colors: #B91C1C for 17-18, #1D4ED8 for 19-20) -->
+    <!-- 17. ico-forgery -->
+    <symbol id="ico-forgery" viewBox="0 0 48 48">
+      <path d="M 10 12 C 10 9.8 11.8 8 14 8 L 29 8 L 38 17 L 38 25 M 24 40 L 14 40 C 11.8 40 10 38.2 10 36 L 10 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 29 8 L 29 17 L 38 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 16 18 L 24 18 M 16 24 L 28 24 M 16 30 L 22 30" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="34" cy="34" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 31.5 31.5 L 36.5 36.5 M 36.5 31.5 L 31.5 36.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 18. ico-certificate -->
+    <symbol id="ico-certificate" viewBox="0 0 48 48">
+      <path d="M 10 12 C 10 9.8 11.8 8 14 8 L 29 8 L 38 17 L 38 25 M 24 40 L 14 40 C 11.8 40 10 38.2 10 36 L 10 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 29 8 L 29 17 L 38 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 16 18 L 24 18 M 16 24 L 28 24 M 16 30 L 22 30" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="33" cy="32" r="5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 30 36 L 28 42 L 31 40" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 35 36 L 37 42 L 34 40" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 19. ico-arbitrator -->
+    <symbol id="ico-arbitrator" viewBox="0 0 48 48">
+      <path d="M 24 9 L 24 39 M 16 39 L 32 39" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="24" cy="9" r="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 10 15 L 38 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 10 15 L 6 26 M 10 15 L 14 26" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 5 26 Q 10 31, 15 26 Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 38 15 L 34 26 M 38 15 L 42 26" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 33 26 Q 38 31, 43 26 Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+
+    <!-- 20. ico-hardware-qpu -->
+    <symbol id="ico-hardware-qpu" viewBox="0 0 48 48">
+      <rect x="14" y="14" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="24" cy="24" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 17 8 L 17 14 M 21 8 L 21 14 M 27 8 L 27 14 M 31 8 L 31 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 17 34 L 17 40 M 21 34 L 21 40 M 27 34 L 27 40 M 31 34 L 31 40" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 8 17 L 14 17 M 8 21 L 14 21 M 8 27 L 14 27 M 8 31 L 14 31" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 34 17 L 40 17 M 34 21 L 40 21 M 34 27 L 40 27 M 34 31 L 40 31" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </symbol>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1200" height="920" fill="#FFFFFF"/>
+
+  <!-- Header -->
+  <text x="48" y="56" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="800" fill="#12213F">PAULIGUARD &#183; CUSTOM QUANTUM ICON SET</text>
+  <text x="48" y="82" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="400" fill="#3C4657">monoline &#183; 48x48 grid &#183; stroke 2 &#183; recolourable via currentColor</text>
+
+  <!-- ==================== SPECIMEN GRID (5 columns x 4 rows) ==================== -->
+
+  <!-- ROW 0 (y=130): QUANTUM PRIMITIVES (Color: #12213F) -->
+  <!-- 1. ico-bell-pair -->
+  <g transform="translate(48, 130)" color="#12213F">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-bell-pair" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-bell-pair</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">EPR pair source &amp; distribution</text>
+  </g>
+
+  <!-- 2. ico-teleport -->
+  <g transform="translate(276, 130)" color="#12213F">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-teleport" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-teleport</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">State teleportation channel</text>
+  </g>
+
+  <!-- 3. ico-pauli-x -->
+  <g transform="translate(504, 130)" color="#12213F">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-pauli-x" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-pauli-x</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Bit-flip error / X operator</text>
+  </g>
+
+  <!-- 4. ico-pauli-z -->
+  <g transform="translate(732, 130)" color="#12213F">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-pauli-z" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-pauli-z</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Phase-flip error / Z operator</text>
+  </g>
+
+  <!-- 5. ico-pauli-group -->
+  <g transform="translate(960, 130)" color="#12213F">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-pauli-group" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-pauli-group</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">n-qubit Pauli group P_n</text>
+  </g>
+
+  <!-- ROW 1 (y=320): QUANTUM PRIMITIVES (Color: #12213F) -->
+  <!-- 6. ico-stabilizer -->
+  <g transform="translate(48, 320)" color="#12213F">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-stabilizer" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-stabilizer</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Stabilizer generator &amp; eigenspace</text>
+  </g>
+
+  <!-- 7. ico-measurement -->
+  <g transform="translate(276, 320)" color="#12213F">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-measurement" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-measurement</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Projective measurement &amp; readout</text>
+  </g>
+
+  <!-- 8. ico-qubit-register -->
+  <g transform="translate(504, 320)" color="#12213F">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-qubit-register" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-qubit-register</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Qubit registers &amp; lifetimes</text>
+  </g>
+
+  <!-- 9. ico-entangle-break -->
+  <g transform="translate(732, 320)" color="#12213F">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-entangle-break" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-entangle-break</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Decoherence &amp; link failure</text>
+  </g>
+
+  <!-- 10. ico-swap-test -->
+  <g transform="translate(960, 320)" color="#12213F">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-swap-test" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-swap-test</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Fidelity &amp; state overlap test</text>
+  </g>
+
+  <!-- ROW 2 (y=510): MATHEMATICS AND STATISTICS (Color: #15713D) -->
+  <!-- 11. ico-gf2-matrix -->
+  <g transform="translate(48, 510)" color="#15713D">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-gf2-matrix" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-gf2-matrix</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">GF(2) symplectic tableau</text>
+  </g>
+
+  <!-- 12. ico-symplectic -->
+  <g transform="translate(276, 510)" color="#15713D">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-symplectic" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-symplectic</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Symplectic inner product form</text>
+  </g>
+
+  <!-- 13. ico-nullspace -->
+  <g transform="translate(504, 510)" color="#15713D">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-nullspace" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-nullspace</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Malleability subspace (L3 nullspace)</text>
+  </g>
+
+  <!-- 14. ico-threshold-curve -->
+  <g transform="translate(732, 510)" color="#15713D">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-threshold-curve" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-threshold-curve</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Serfling tail bound &amp; threshold</text>
+  </g>
+
+  <!-- 15. ico-confidence-band -->
+  <g transform="translate(960, 510)" color="#15713D">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-confidence-band" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-confidence-band</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Azuma martingale confidence band</text>
+  </g>
+
+  <!-- ROW 3 (y=700): MATH (16) & SECURITY/PROCESS (17-20) -->
+  <!-- 16. ico-sampling (Color: #15713D) -->
+  <g transform="translate(48, 700)" color="#15713D">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-sampling" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-sampling</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Hypergeometric sampling</text>
+  </g>
+
+  <!-- 17. ico-forgery (Color: #B91C1C) -->
+  <g transform="translate(276, 700)" color="#B91C1C">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-forgery" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-forgery</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Adversarial forgery detection</text>
+  </g>
+
+  <!-- 18. ico-certificate (Color: #B91C1C) -->
+  <g transform="translate(504, 700)" color="#B91C1C">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-certificate" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-certificate</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Algebraic ATTACK certificate (L3)</text>
+  </g>
+
+  <!-- 19. ico-arbitrator (Color: #1D4ED8) -->
+  <g transform="translate(732, 700)" color="#1D4ED8">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-arbitrator" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-arbitrator</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Dispute arbitration &amp; verification</text>
+  </g>
+
+  <!-- 20. ico-hardware-qpu (Color: #1D4ED8) -->
+  <g transform="translate(960, 700)" color="#1D4ED8">
+    <rect x="0" y="0" width="216" height="162" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+    <use href="#ico-hardware-qpu" x="76" y="16" width="64" height="64"/>
+    <text x="108" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#12213F" text-anchor="middle">ico-hardware-qpu</text>
+    <text x="108" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="400" fill="#3C4657" text-anchor="middle">Physical QPU backend execution</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="48" y="896" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#3C4657">No vendor logo exists for any of these concepts. Drawn for PauliGuard rather than borrowed.</text>
+</svg>
