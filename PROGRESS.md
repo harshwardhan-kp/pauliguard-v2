@@ -216,3 +216,20 @@ MEASURED END TO END THROUGH THE ENGINE:
   honest acceptance on hardened       500/500 = 1.0000 (fix costs ZERO false rejections)
   k sweep vs 2^-k: k=1 0.5045 | k=2 0.2515 | k=4 0.0565 | k=8 0.0035, all within 3 SE, monotonic
   Z attack: no power, correctly, since <psi|Z|psi>=1 and Z does not change the message.
+
+## SCALING FINDING (2026-08-31) — our own result, NOT a reproduction
+Permuted chained-CNOT (X/Z layer + CNOT chain + qubit permutation), full keyspace 4^n * n!
+enumerated exactly. Adversary must FIX U in advance, so success = fraction of surviving keys.
+RESULT: exactly TWO weight-1 attacks survive - Z on qubit 0 (chain head) and X on qubit n-1
+(chain tail) - each at rate EXACTLY 1/n (1/2, 1/3, 1/4; rate*n = 1.0000, zero fit error).
+MECHANISM: the CNOT chain propagates X forward and Z backward, so only the head/tail operators
+do not spread. The residual 1/n is the chance the random permutation returns the attacked qubit
+to the assumed position. Chaining alone does NOT stop the attack; it makes it POSITIONAL. The
+permutation is what turns probability 1 into probability 1/n.
+Only X-on-tail changes a computational-basis message; Z-on-head is a phase flip and must not be
+counted as a forgery.
+HONESTY: the secondhand figure is 1/(8n); we measured 1/n. Ratio exactly 8 = 2^3, consistent
+with three further single-bit key conditions in their construction that ours does not model.
+WE DO NOT CLAIM REPRODUCTION. We did not tune to hit 1/(8n). Closing this properly requires
+arXiv:2603.19985 (~1h once in hand) and would upgrade it to genuine external validation.
+Written up in docs/scaling_finding.md.
