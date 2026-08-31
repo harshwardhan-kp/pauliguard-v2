@@ -15,6 +15,7 @@
     currentSpecData: null,
     lastRunResult: null,
     isLoading: false,
+    previousForgeryRate: null,
   };
 
   // DOM Elements cache
@@ -38,7 +39,7 @@
     btnRunForgery: document.getElementById('btnRunForgery'),
     btnRunCompare: document.getElementById('btnRunCompare'),
 
-    // Left Column: Spec
+    // Left Column: Spec & Live Editor
     specFamilyBadge: document.getElementById('specFamilyBadge'),
     specCitation: document.getElementById('specCitation'),
     specEncryptionTag: document.getElementById('specEncryptionTag'),
@@ -46,6 +47,22 @@
     specDecoyTag: document.getElementById('specDecoyTag'),
     yamlSpecPane: document.getElementById('yamlSpecPane'),
     btnCopyYaml: document.getElementById('btnCopyYaml'),
+    btnReanalyseSpec: document.getElementById('btnReanalyseSpec'),
+    btnResetSpec: document.getElementById('btnResetSpec'),
+    btnAddSwapTestFix: document.getElementById('btnAddSwapTestFix'),
+    btnRemoveArbitratorCheck: document.getElementById('btnRemoveArbitratorCheck'),
+    specEditorError: document.getElementById('specEditorError'),
+    specEditorErrorMsg: document.getElementById('specEditorErrorMsg'),
+    liveResultsStrip: document.getElementById('liveResultsStrip'),
+    liveResultsStatusBadge: document.getElementById('liveResultsStatusBadge'),
+    resMalDim: document.getElementById('resMalDim'),
+    resCertCount: document.getElementById('resCertCount'),
+    resHonestRate: document.getElementById('resHonestRate'),
+    resForgeryRate: document.getElementById('resForgeryRate'),
+    resForgeryDelta: document.getElementById('resForgeryDelta'),
+    resDisputeCount: document.getElementById('resDisputeCount'),
+    resDegradedNotice: document.getElementById('resDegradedNotice'),
+    resDegradedText: document.getElementById('resDegradedText'),
     assumedFieldsList: document.getElementById('assumedFieldsList'),
     specWarningsContainer: document.getElementById('specWarningsContainer'),
     specWarningsList: document.getElementById('specWarningsList'),
@@ -227,12 +244,195 @@
   }
 
   // =========================================================================
-  // LEFT COLUMN: SPEC & ASSUMED FIELDS RENDERING
+  // LEFT COLUMN: SPEC & LIVE EDITING HELPERS
   // =========================================================================
+
+  function showEditorError(msg) {
+    elements.specEditorErrorMsg.textContent = msg;
+    elements.specEditorError.classList.remove('hidden');
+  }
+
+  function hideEditorError() {
+    elements.specEditorError.classList.add('hidden');
+    elements.specEditorErrorMsg.textContent = '';
+  }
+
+  function addSwapTestFixToYaml(yamlText) {
+    const hardeningBlock = 'hardening:\n  swap_test:\n    enabled: true\n    copies: 8';
+    if (/^hardening\s*:/m.test(yamlText)) {
+      return yamlText.replace(/^hardening\s*:(?:\n[ \t]+[^\n]*|\n(?![a-zA-Z0-9_-]+\s*:)[ \t]*[^\n]*)*/m, hardeningBlock);
+    }
+    return yamlText.trimEnd() + '\n\n' + hardeningBlock + '\n';
+  }
+
+  function removeArbitratorCheckFromYaml(yamlText) {
+    const lines = yamlText.split('\n');
+    let stepIndices = [];
+    let inSteps = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (/^steps\s*:/.test(line)) {
+        inSteps = true;
+        continue;
+      }
+      if (inSteps && /^[a-zA-Z0-9_-]+\s*:/.test(line) && !line.startsWith(' ') && !line.startsWith('\t')) {
+        inSteps = false;
+        continue;
+      }
+      if (inSteps && /^\s*-\s+/.test(line)) {
+        stepIndices.push(i);
+      }
+    }
+
+    for (let k = 0; k < stepIndices.length; k++) {
+      const start = stepIndices[k];
+      const end = (k + 1 < stepIndices.length) ? stepIndices[k + 1] : lines.length;
+      const stepText = lines.slice(start, end).join('\n');
+      if (stepText.includes('trent_verify_equality_predicate')) {
+        let actualEnd = end;
+        for (let j = start + 1; j < lines.length; j++) {
+          if (/^\s*-\s+/.test(lines[j]) || (/^[a-zA-Z0-9_-]+\s*:/.test(lines[j]) && !lines[j].startsWith(' '))) {
+            actualEnd = j;
+            break;
+          }
+        }
+        lines.splice(start, actualEnd - start);
+        return lines.join('\n');
+      }
+    }
+
+    // Fallback regex if line scanner didn't match
+    return yamlText.replace(/\n\s*-\s+procedure:[^\n]*\n(?:[ \t]+[^\n]*\n)*?[ \t]*name:\s*["']?trent_verify_equality_predicate["']?[^\n]*(?:\n[ \t]+[^\n]*)*/g, '');
+  }
+
+  async function handleReanalyseSpec() {
+    hideEditorError();
+    const yamlText = elements.yamlSpecPane.value || '';
+    const params = getControlValues();
+    const payload = {
+      yaml: yamlText,
+      n_message_qubits: params.n_message_qubits,
+      trials: 50,
+    };
+
+    try {
+      elements.liveResultsStatusBadge.textContent = 'Analysing...';
+      const response = await fetch('/api/analyse_spec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.stage === 'parse') {
+        const errorMsg = data.error || `HTTP ${response.status}: Failed analysing specification.`;
+        showEditorError(errorMsg);
+        elements.liveResultsStatusBadge.textContent = 'Parse Error';
+        return;
+      }
+
+      // Update Results Strip
+      elements.resMalDim.textContent = String(data.malleability_dimension ?? '0');
+      const certCount = Array.isArray(data.certificates) ? data.certificates.length : 0;
+      elements.resCertCount.textContent = String(certCount);
+
+      const hRate = data.honest_acceptance_rate !== undefined ? Number(data.honest_acceptance_rate) : 1.0;
+      elements.resHonestRate.textContent = hRate.toFixed(3);
+
+      const fRate = data.forgery_success_rate !== undefined ? Number(data.forgery_success_rate) : 0.0;
+      elements.resForgeryRate.textContent = fRate.toFixed(3);
+
+      // Delta calculation
+      if (state.previousForgeryRate !== null && state.previousForgeryRate !== undefined) {
+        const delta = fRate - state.previousForgeryRate;
+        if (delta < -0.001) {
+          elements.resForgeryDelta.textContent = `▼ ${delta.toFixed(3)}`;
+          elements.resForgeryDelta.className = 'delta-badge delta-drop';
+        } else if (delta > 0.001) {
+          elements.resForgeryDelta.textContent = `▲ +${delta.toFixed(3)}`;
+          elements.resForgeryDelta.className = 'delta-badge delta-rise';
+        } else {
+          elements.resForgeryDelta.textContent = `(0.000)`;
+          elements.resForgeryDelta.className = 'delta-badge delta-neutral';
+        }
+      } else {
+        elements.resForgeryDelta.textContent = '(baseline)';
+        elements.resForgeryDelta.className = 'delta-badge delta-neutral';
+      }
+      state.previousForgeryRate = fRate;
+
+      // Dispute findings summary
+      const findings = Array.isArray(data.dispute_findings) ? data.dispute_findings : [];
+      const critCount = findings.filter(f => f.severity === 'critical').length;
+      elements.resDisputeCount.textContent = `${findings.length} findings (${critCount} critical)`;
+
+      // Warnings container
+      const warnings = Array.isArray(data.warnings) ? data.warnings : [];
+      if (warnings.length > 0) {
+        elements.specWarningsList.innerHTML = '';
+        warnings.forEach(w => {
+          const li = document.createElement('li');
+          li.textContent = w;
+          elements.specWarningsList.appendChild(li);
+        });
+        elements.specWarningsContainer.classList.remove('hidden');
+      } else {
+        elements.specWarningsContainer.classList.add('hidden');
+      }
+
+      // Degraded notice
+      if (data.degraded) {
+        elements.resDegradedNotice.classList.remove('hidden');
+        elements.resDegradedText.textContent = data.degraded;
+      } else {
+        elements.resDegradedNotice.classList.add('hidden');
+      }
+
+      // Update Certificate Panel if present
+      if (certCount > 0 && data.certificates[0]) {
+        updateCertificatePanel(data.certificates[0]);
+      } else {
+        updateCertificatePanel(null);
+      }
+
+      elements.liveResultsStatusBadge.textContent = 'Updated';
+    } catch (err) {
+      console.error('Error re-analysing spec:', err);
+      showEditorError(err.message || 'Unknown network error analysing spec.');
+    }
+  }
+
+  function handleResetSpec() {
+    hideEditorError();
+    if (state.currentSpecData && state.currentSpecData.raw) {
+      elements.yamlSpecPane.value = state.currentSpecData.raw;
+      handleReanalyseSpec();
+    }
+  }
+
+  function handleAddSwapTestFix() {
+    hideEditorError();
+    const currentYaml = elements.yamlSpecPane.value || '';
+    elements.yamlSpecPane.value = addSwapTestFixToYaml(currentYaml);
+    handleReanalyseSpec();
+  }
+
+  function handleRemoveArbitratorCheck() {
+    hideEditorError();
+    const currentYaml = elements.yamlSpecPane.value || '';
+    elements.yamlSpecPane.value = removeArbitratorCheckFromYaml(currentYaml);
+    handleReanalyseSpec();
+  }
 
   async function loadSchemeSpec(schemeName) {
     if (!schemeName) return;
     try {
+      hideEditorError();
       const specData = await apiRequest(`/api/schemes/${encodeURIComponent(schemeName)}/spec`);
       state.currentSpecData = specData;
       state.currentSchemeName = schemeName;
@@ -253,8 +453,8 @@
         : (specData.spec && specData.spec.decoy_protected_fraction ? Math.round(specData.spec.decoy_protected_fraction * 100) : 0);
       elements.specDecoyTag.textContent = `Decoy Protected: ${decoyFrac}%`;
 
-      // Update YAML Pane
-      elements.yamlSpecPane.textContent = specData.raw || specData.yaml || (specData.spec ? JSON.stringify(specData.spec, null, 2) : '');
+      // Update YAML Editor Textarea
+      elements.yamlSpecPane.value = specData.raw || specData.yaml || (specData.spec ? JSON.stringify(specData.spec, null, 2) : '');
 
       // Update Assumed Fields (Deliberate Honesty Display)
       elements.assumedFieldsList.innerHTML = '';
@@ -286,6 +486,9 @@
       } else {
         elements.specWarningsContainer.classList.add('hidden');
       }
+
+      // Re-analyse spec for live results strip
+      await handleReanalyseSpec();
     } catch (err) {
       console.error('Failed to load scheme spec:', err);
     }
@@ -671,9 +874,23 @@
     elements.btnRunForgery.addEventListener('click', handleRunForgery);
     elements.btnRunCompare.addEventListener('click', handleRunCompare);
 
-    // 4. Copy YAML button
+    // 4. Live Spec Editor Action Buttons
+    if (elements.btnReanalyseSpec) {
+      elements.btnReanalyseSpec.addEventListener('click', () => handleReanalyseSpec());
+    }
+    if (elements.btnResetSpec) {
+      elements.btnResetSpec.addEventListener('click', handleResetSpec);
+    }
+    if (elements.btnAddSwapTestFix) {
+      elements.btnAddSwapTestFix.addEventListener('click', handleAddSwapTestFix);
+    }
+    if (elements.btnRemoveArbitratorCheck) {
+      elements.btnRemoveArbitratorCheck.addEventListener('click', handleRemoveArbitratorCheck);
+    }
+
+    // 5. Copy YAML button
     elements.btnCopyYaml.addEventListener('click', () => {
-      const yaml = elements.yamlSpecPane.textContent;
+      const yaml = elements.yamlSpecPane.value || elements.yamlSpecPane.textContent;
       if (navigator.clipboard && yaml) {
         navigator.clipboard.writeText(yaml).then(() => {
           const originalText = elements.btnCopyYaml.textContent;

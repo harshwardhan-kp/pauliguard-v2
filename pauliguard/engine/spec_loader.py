@@ -76,14 +76,23 @@ class SchemeSpec:
             return 0
 
 
-def load_spec(path: str | Path) -> SchemeSpec:
-    """Load a single SchemeSpec from a YAML file.
+def load_spec_from_string(yaml_text: str, source_label: str = "<edited>") -> SchemeSpec:
+    """Load a single SchemeSpec from a YAML string without filesystem access.
 
-    Missing optional fields default sensibly and will never crash.
+    Raises a clear ValueError with a readable message on malformed YAML rather than
+    propagating a raw yaml exception. Missing optional fields default sensibly.
     """
-    p = Path(path)
-    with p.open("r", encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
+    try:
+        data = yaml.safe_load(yaml_text)
+    except Exception as exc:
+        raise ValueError(f"Malformed YAML in {source_label}: {exc}") from exc
+
+    if data is None:
+        data = {}
+    elif not isinstance(data, dict):
+        raise ValueError(
+            f"Malformed YAML in {source_label}: expected top-level mapping/dict, got {type(data).__name__}"
+        )
 
     name = str(data.get("name", ""))
     citation = str(data.get("citation", ""))
@@ -199,9 +208,20 @@ def load_spec(path: str | Path) -> SchemeSpec:
         steps=steps,
         claims=claims,
         assumed_fields=assumed_fields,
-        source_path=str(p),
+        source_path=source_label,
         hardening=hardening,
     )
+
+
+def load_spec(path: str | Path) -> SchemeSpec:
+    """Load a single SchemeSpec from a YAML file.
+
+    Missing optional fields default sensibly and will never crash.
+    """
+    p = Path(path)
+    with p.open("r", encoding="utf-8") as f:
+        text = f.read()
+    return load_spec_from_string(text, source_label=str(p))
 
 
 def discover_specs(directory: str | Path) -> dict[str, SchemeSpec]:

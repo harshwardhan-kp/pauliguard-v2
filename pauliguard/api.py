@@ -20,17 +20,24 @@ from typing import Any, Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import stim
 
+from pauliguard.attacks.repudiation import DisputeAnalyser
 from pauliguard.detectors.layer0 import Layer0
 from pauliguard.detectors.layer1 import Layer1
 from pauliguard.detectors.layer2 import Layer2
 from pauliguard.detectors.layer3 import Layer3
 from pauliguard.engine.encryption import ChainedCNOT, QOTP
-from pauliguard.engine.protocol import ProtocolEngine, RunConfig
-from pauliguard.engine.spec_loader import SchemeSpec, discover_specs, validate_spec
+from pauliguard.engine.protocol import ProtocolEngine, RunConfig, run_many
+from pauliguard.engine.spec_loader import (
+    SchemeSpec,
+    discover_specs,
+    load_spec_from_string,
+    validate_spec,
+)
 from pauliguard.engine.trace import Trace, validate
 from pauliguard.evaluation import evaluate, false_positive_curve
 
@@ -134,6 +141,12 @@ class CompareRequest(BaseModel):
     decoy_rounds: int = 4200
     alpha: float = 1e-10
     seed: Optional[int] = None
+
+
+class AnalyseSpecRequest(BaseModel):
+    yaml: str
+    n_message_qubits: int = 2
+    trials: int = 50
 
 
 def _evaluate_trace_layers(
@@ -454,6 +467,129 @@ def get_evaluation(
         "cells": matrix_json.get("cells", {}),
         "outcomes": matrix_json.get("outcomes", {}),
     }
+
+
+@app.post("/api/analyse_spec")
+def analyse_spec(req: AnalyseSpecRequest) -> Any:
+    """Analyse raw YAML specification in real time without writing to disk.
+
+    Runs validation, Layer 3 algebraic search, static dispute analysis, and
+    empirical execution benchmarks. Gracefully degrades if constructs exceed
+    the stabilizer engine.
+    """
+    # 1. Parse via load_spec_from_string
+    try:
+        spec = load_spec_from_string(req.yaml, source_label="<edited>")
+    except ValueError as exc:
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(exc), "stage": "parse"},
+        )
+    except Exception as exc:
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(exc), "stage": "parse"},
+        )
+
+    # 2. Run validate_spec
+    warnings = validate_spec(spec)
+    swap_test_copies = spec.swap_test_copies()
+
+    # 3. Static Dispute Analysis (never crashes)
+    try:
+        dispute_analyser = DisputeAnalyser(spec)
+        findings = dispute_analyser.analyse()
+        dispute_findings = [asdict(f) for f in findings]
+    except Exception as exc:
+        dispute_findings = [{
+            "code": "DR.INTERNAL_ERROR",
+            "severity": "warning",
+            "threat": "repudiation_of_origin",
+            "message": f"Error during dispute analysis: {exc}",
+            "claimed_by_scheme": False,
+            "evidence": {"error": str(exc)},
+        }]
+
+    # 4. Layer 3 and Execution Benchmarks with graceful degradation
+    n_qubits = req.n_message_qubits if req.n_message_qubits > 0 else (
+        spec.n_message_qubits if spec.n_message_qubits > 0 else 2
+    )
+    trials = req.trials if req.trials > 0 else 50
+
+    certificates: list[dict[str, Any]] = []
+    malleability_dimension: int = 0
+    forgery_success_rate: float = 0.0
+    honest_acceptance_rate: float = 1.0
+    degraded: str | None = None
+
+    try:
+        engine = ProtocolEngine(spec)
+
+        # Layer 3 Algebraic Malleability
+        if engine.enc is not None:
+            l3 = Layer3(spec, engine.enc)
+            l3_certs = l3.analyse(n=n_qubits, trials=trials)
+            certificates = [asdict(c) for c in l3_certs]
+            if l3_certs:
+                malleability_dimension = int(l3_certs[0].malleability_dimension)
+            else:
+                first_key = next(engine.enc.iter_keys(n_qubits), None)
+                if first_key is not None:
+                    basis = l3.malleability_subspace(first_key, n_qubits)
+                    malleability_dimension = int(basis.shape[0])
+                else:
+                    malleability_dimension = 0
+        else:
+            certificates = []
+            malleability_dimension = 0
+
+        # Short honest batch
+        cfg_honest = RunConfig(
+            n_message_qubits=n_qubits,
+            noise_p=0.0,
+            floor=MEASURED_FLOOR,
+            decoy_rounds=400,
+            seed=42,
+            attack=None,
+        )
+        honest_traces = run_many(engine, cfg_honest, trials=trials)
+        honest_accepted = sum(1 for t in honest_traces if t.accepted)
+        honest_acceptance_rate = (honest_accepted / len(honest_traces)) if honest_traces else 1.0
+
+        # Short paired_pauli batch
+        cfg_forged = RunConfig(
+            n_message_qubits=n_qubits,
+            noise_p=0.0,
+            floor=MEASURED_FLOOR,
+            decoy_rounds=400,
+            seed=42,
+            attack="paired_pauli",
+            attack_pauli="X",
+        )
+        forged_traces = run_many(engine, cfg_forged, trials=trials)
+        forgery_accepted = sum(1 for t in forged_traces if t.accepted)
+        forgery_success_rate = (forgery_accepted / len(forged_traces)) if forged_traces else 0.0
+
+    except Exception as exc:
+        degraded = (
+            f"Stabilizer simulation limitation: {exc}. "
+            f"Static dispute analysis and spec validation were completed successfully."
+        )
+
+    res: dict[str, Any] = {
+        "parsed_ok": True,
+        "warnings": warnings,
+        "malleability_dimension": malleability_dimension,
+        "certificates": certificates,
+        "dispute_findings": dispute_findings,
+        "forgery_success_rate": forgery_success_rate,
+        "honest_acceptance_rate": honest_acceptance_rate,
+        "swap_test_copies": swap_test_copies,
+    }
+    if degraded is not None:
+        res["degraded"] = degraded
+
+    return res
 
 
 # Static files mount if directory exists

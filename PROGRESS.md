@@ -233,3 +233,17 @@ with three further single-bit key conditions in their construction that ours doe
 WE DO NOT CLAIM REPRODUCTION. We did not tune to hit 1/(8n). Closing this properly requires
 arXiv:2603.19985 (~1h once in hand) and would upgrade it to genuine external validation.
 Written up in docs/scaling_finding.md.
+
+## LIVE SPEC EDITING — COMPLETE (2026-08-31)
+The unrehearsed-input demo. Judge edits YAML in the browser; nothing is written to disk.
+POST /api/analyse_spec parses a raw YAML string, runs validate_spec, L3, DisputeAnalyser and
+short honest/attacked batches, and returns dimension, certificates, dispute findings and rates.
+Browser-verified end to end (clicked the actual buttons):
+  baseline lu-2022        dim=4 certs=1 forgery=1.0000 honest=1.0000
+  + swap_test copies=8    dim=4 certs=0 forgery=0.0000 honest=1.0000   <- attack disappears
+  - arbitrator check      dim=4 certs=1 forgery=1.0000 honest=1.0000
+  malformed YAML          HTTP 400 stage=parse (never 500, never a blank screen)
+  unknown encryption      parsed_ok with a warning, not a crash
+NOTE, state it if asked: removing the arbitrator check does NOT grow the malleability dimension,
+because at n=2 dim is already 4 = 2n, i.e. the whole Pauli group modulo phase. It is maximal and
+cannot grow. That is correct behaviour, not a bug.

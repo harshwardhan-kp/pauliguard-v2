@@ -117,13 +117,76 @@
           </div>
         </div>
 
+        <!-- LIVE SPEC EDITING TOOLBAR -->
+        <div class="editor-toolbar" aria-label="Spec Editor Actions">
+          <div class="toolbar-primary-row">
+            <button id="btnReanalyseSpec" class="btn btn-primary btn-sm" title="Re-analyse edited YAML spec in real time">
+              ⚡ RE-ANALYSE EDITED SPEC
+            </button>
+            <button id="btnResetSpec" class="btn btn-secondary btn-sm" title="Reset editor to on-disk original">
+              ↺ RESET TO ORIGINAL
+            </button>
+          </div>
+          <div class="toolbar-preset-row">
+            <span class="preset-label">MUTATE:</span>
+            <button id="btnAddSwapTestFix" class="btn btn-mutate btn-sm" title="Insert 8-copy SWAP test hardening block">
+              + ADD SWAP-TEST FIX
+            </button>
+            <button id="btnRemoveArbitratorCheck" class="btn btn-mutate btn-sm" title="Delete trent_verify_equality_predicate step">
+              - REMOVE ARBITRATOR CHECK
+            </button>
+          </div>
+        </div>
+
+        <!-- INLINE PARSE ERROR ALERT -->
+        <div id="specEditorError" class="spec-editor-error hidden" role="alert">
+          <span class="error-badge">PARSE ERROR</span>
+          <span id="specEditorErrorMsg" class="error-msg-text">Error details</span>
+        </div>
+
         <!-- SPEC YAML PANE -->
-        <div class="pane-container">
+        <div class="pane-container pane-editor-container">
           <div class="pane-header">
-            <span class="pane-title">SPECIFICATION YAML</span>
+            <span class="pane-title">SPECIFICATION YAML (EDITABLE)</span>
             <button id="btnCopyYaml" class="btn-link" title="Copy YAML to clipboard">Copy</button>
           </div>
-          <pre id="yamlSpecPane" class="yaml-pane mono">Loading YAML specification...</pre>
+          <textarea id="yamlSpecPane" class="yaml-pane yaml-editor mono" spellcheck="false" aria-label="Specification YAML Editor" placeholder="Type or paste YAML specification here...">Loading YAML specification...</textarea>
+        </div>
+
+        <!-- LIVE ANALYSIS RESULTS STRIP -->
+        <div id="liveResultsStrip" class="live-results-strip">
+          <div class="results-strip-header">
+            <span class="results-strip-title">LIVE ANALYSIS RESULTS</span>
+            <span id="liveResultsStatusBadge" class="results-status-badge">Initial Spec</span>
+          </div>
+          <div class="results-grid">
+            <div class="result-cell">
+              <span class="result-label">Malleability Dim</span>
+              <span id="resMalDim" class="result-value mono bold">4</span>
+            </div>
+            <div class="result-cell">
+              <span class="result-label">Certificates</span>
+              <span id="resCertCount" class="result-value mono bold">1</span>
+            </div>
+            <div class="result-cell">
+              <span class="result-label">Honest Accept</span>
+              <span id="resHonestRate" class="result-value mono bold text-success">1.000</span>
+            </div>
+            <div class="result-cell">
+              <span class="result-label">Forgery Rate</span>
+              <div class="rate-with-delta">
+                <span id="resForgeryRate" class="result-value mono bold text-danger">1.000</span>
+                <span id="resForgeryDelta" class="delta-badge delta-neutral">—</span>
+              </div>
+            </div>
+            <div class="result-cell result-cell-wide">
+              <span class="result-label">Dispute Findings</span>
+              <span id="resDisputeCount" class="result-value mono">0 findings</span>
+            </div>
+          </div>
+          <div id="resDegradedNotice" class="degraded-notice hidden">
+            <span id="resDegradedText">Stabilizer limitation notice</span>
+          </div>
         </div>
 
         <!-- HONESTY DISPLAY: ASSUMED FIELDS -->

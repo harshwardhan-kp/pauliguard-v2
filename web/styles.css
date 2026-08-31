@@ -499,17 +499,101 @@ html, body {
   border: 1px solid var(--border-light);
 }
 
-/* Monospace YAML Pane */
+/* Editor Toolbar */
+.editor-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 8px 10px;
+  box-shadow: var(--shadow-sm);
+}
+
+.toolbar-primary-row {
+  display: flex;
+  gap: 6px;
+}
+
+.toolbar-preset-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.preset-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.btn-sm {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 0.76rem;
+}
+
+.btn-mutate {
+  background-color: #f8fafc;
+  color: #334155;
+  border-color: #cbd5e1;
+  font-weight: 700;
+}
+
+.btn-mutate:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  border-color: var(--blue-primary);
+  color: var(--blue-primary);
+}
+
+/* Inline Parse Error Alert */
+.spec-editor-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background-color: var(--red-bg);
+  border: 1px solid var(--red-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  color: var(--red-text);
+  line-height: 1.35;
+}
+
+.spec-editor-error .error-badge {
+  background-color: var(--red-pill-bg);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.spec-editor-error .error-msg-text {
+  font-family: var(--font-mono);
+  word-break: break-word;
+}
+
+/* Monospace YAML Pane & Textarea */
 .pane-container {
   display: flex;
   flex-direction: column;
   flex: 1 1 0;
-  min-height: 140px;
+  min-height: 160px;
   background-color: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+}
+
+.pane-editor-container {
+  min-height: 220px;
 }
 
 .pane-header {
@@ -537,6 +621,131 @@ html, body {
   background-color: #fafbfc;
   overflow: auto;
   white-space: pre;
+}
+
+textarea.yaml-editor {
+  resize: vertical;
+  border: none;
+  outline: none;
+  font-family: var(--font-mono);
+  tab-size: 2;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+textarea.yaml-editor:focus {
+  background-color: #ffffff;
+}
+
+/* Live Analysis Results Strip */
+.live-results-strip {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
+}
+
+.results-strip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 4px;
+}
+
+.results-strip-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.results-status-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--blue-primary);
+  background-color: var(--blue-subtle);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 12px;
+}
+
+.result-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.result-cell-wide {
+  grid-column: span 2;
+}
+
+.result-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.result-value {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+}
+
+.rate-with-delta {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.delta-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.delta-drop {
+  background-color: var(--green-bg);
+  color: var(--green-text);
+}
+
+.delta-rise {
+  background-color: var(--red-bg);
+  color: var(--red-text);
+}
+
+.delta-neutral {
+  background-color: var(--bg-subtle);
+  color: var(--text-muted);
+}
+
+.text-success {
+  color: var(--green-text) !important;
+}
+
+.text-danger {
+  color: var(--red-text) !important;
+}
+
+.degraded-notice {
+  background-color: var(--amber-bg);
+  border: 1px solid var(--amber-border);
+  color: var(--amber-text);
+  font-size: 0.74rem;
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
 /* Assumed Fields (Honesty Disclosure) */
