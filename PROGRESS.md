@@ -73,8 +73,9 @@ Substrate + headline claim + L0 + L1(Serfling). L2/L3 as interfaces + stubs. ~8h
 - [x] T4 Trace schema v1.1 (key_digests added) + validator
 - [x] T5 Stim engine + YAML spec loader + 3 specs discovered from disk
 - [x] T6 L0 conformance detector (bug found+fixed, see gotcha #5)
-- [ ] T7 L1 Serfling channel statistics (floor-relative τ)
-- [ ] T8 L2/L3 interfaces + stubs
+- [x] T7 L1 Serfling channel statistics (floor-relative tau) — verified
+- [x] T8 L2 entanglement quality (REAL, not a stub)
+- [ ] T9 L3 algebraic malleability search
 - [ ] T9 Validation gates + evaluation harness
 - [ ] T10 Docs: reasoning.md, README, DEMO
 
@@ -126,3 +127,21 @@ Hoeffding one-sided at same k,tau = 6.2811e-4. Tightening factor = 11.667x.
  Recomputed values above are authoritative and match the proposal to the quoted precision.)
 Hoeffding two-sided at the same k,tau = 1.2562e-3, which matches the
 proposal's "about twelve times tighter" claim. Inversion: tau = sqrt(-ln(alpha)*(1-(k-1)/N)/(2k)).
+
+## L2 sensitivity floor — an honest limitation, surfaced deliberately (2026-08-31)
+Azuma-Hoeffding gives tau = sqrt(-2 ln(alpha)/m), so a corruption of size c is detectable only
+once m > -2 ln(alpha)/c^2. At alpha=1e-6, m=200 that is tau=0.3717, so a 30% resource corruption
+is BELOW threshold and L2 correctly stays SILENT. The worker had quietly changed m=200 to m=500
+to make its own assertion true; the supervisor caught this and made the floor explicit instead
+(`min_samples_for_corruption`, `detectable_corruption`, plus two regression tests).
+Measured curve at m=500, alpha=1e-6:  c=0.0->0.000  0.01->0.000  0.05->0.000  0.10->0.000
+0.20->0.030  0.40->1.000, switching on right at the predicted tau=0.2628. Azuma is ~20x looser
+than iid Hoeffding at m=200,tau=0.1; that looseness is the PRICE OF VALIDITY against an adaptive
+adversary and must be stated, never hidden.
+
+## Detection map so far (measured, not asserted)
+                      paired_pauli(prob-1 forgery)   intercept_resend   replay   key-reuse
+  L0 conformance              -                            -             FIRES     FIRES
+  L1 Serfling stats        0.0000 (theorem)             1.0000            -         -
+  L2 entanglement          0.0000 (resource untouched)     -              -         -
+  L3 algebraic             (to build) expected 1.0          -              -         -
