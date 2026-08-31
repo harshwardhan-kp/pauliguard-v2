@@ -1,0 +1,521 @@
+{
+  "rows": [
+    "honest",
+    "paired_pauli_X",
+    "paired_pauli_Y",
+    "paired_pauli_Z",
+    "unpaired_pauli",
+    "intercept_resend",
+    "replay",
+    "key_reuse"
+  ],
+  "cols": [
+    "L0",
+    "L1",
+    "L2",
+    "L3",
+    "ANY"
+  ],
+  "noise_p": 0.0,
+  "alpha": 1e-10,
+  "cells": {
+    "honest:L0": {
+      "layer": "L0",
+      "attack": "honest",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "honest:L1": {
+      "layer": "L1",
+      "attack": "honest",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "honest:L2": {
+      "layer": "L2",
+      "attack": "honest",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "honest:L3": {
+      "layer": "L3",
+      "attack": "honest",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "honest:ANY": {
+      "layer": "ANY",
+      "attack": "honest",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "paired_pauli_X:L0": {
+      "layer": "L0",
+      "attack": "paired_pauli_X",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "paired_pauli_X:L1": {
+      "layer": "L1",
+      "attack": "paired_pauli_X",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "paired_pauli_X:L2": {
+      "layer": "L2",
+      "attack": "paired_pauli_X",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "paired_pauli_X:L3": {
+      "layer": "L3",
+      "attack": "paired_pauli_X",
+      "detections": 300,
+      "trials": 300,
+      "rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "paired_pauli_X:ANY": {
+      "layer": "ANY",
+      "attack": "paired_pauli_X",
+      "detections": 300,
+      "trials": 300,
+      "rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "paired_pauli_Y:L0": {
+      "layer": "L0",
+      "attack": "paired_pauli_Y",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "paired_pauli_Y:L1": {
+      "layer": "L1",
+      "attack": "paired_pauli_Y",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "paired_pauli_Y:L2": {
+      "layer": "L2",
+      "attack": "paired_pauli_Y",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "paired_pauli_Y:L3": {
+      "layer": "L3",
+      "attack": "paired_pauli_Y",
+      "detections": 300,
+      "trials": 300,
+      "rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "paired_pauli_Y:ANY": {
+      "layer": "ANY",
+      "attack": "paired_pauli_Y",
+      "detections": 300,
+      "trials": 300,
+      "rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "paired_pauli_Z:L0": {
+      "layer": "L0",
+      "attack": "paired_pauli_Z",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "paired_pauli_Z:L1": {
+      "layer": "L1",
+      "attack": "paired_pauli_Z",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "paired_pauli_Z:L2": {
+      "layer": "L2",
+      "attack": "paired_pauli_Z",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "paired_pauli_Z:L3": {
+      "layer": "L3",
+      "attack": "paired_pauli_Z",
+      "detections": 300,
+      "trials": 300,
+      "rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "paired_pauli_Z:ANY": {
+      "layer": "ANY",
+      "attack": "paired_pauli_Z",
+      "detections": 300,
+      "trials": 300,
+      "rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "unpaired_pauli:L0": {
+      "layer": "L0",
+      "attack": "unpaired_pauli",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "unpaired_pauli:L1": {
+      "layer": "L1",
+      "attack": "unpaired_pauli",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "unpaired_pauli:L2": {
+      "layer": "L2",
+      "attack": "unpaired_pauli",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "unpaired_pauli:L3": {
+      "layer": "L3",
+      "attack": "unpaired_pauli",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "unpaired_pauli:ANY": {
+      "layer": "ANY",
+      "attack": "unpaired_pauli",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "intercept_resend:L0": {
+      "layer": "L0",
+      "attack": "intercept_resend",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "intercept_resend:L1": {
+      "layer": "L1",
+      "attack": "intercept_resend",
+      "detections": 300,
+      "trials": 300,
+      "rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "intercept_resend:L2": {
+      "layer": "L2",
+      "attack": "intercept_resend",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "intercept_resend:L3": {
+      "layer": "L3",
+      "attack": "intercept_resend",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "intercept_resend:ANY": {
+      "layer": "ANY",
+      "attack": "intercept_resend",
+      "detections": 300,
+      "trials": 300,
+      "rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "replay:L0": {
+      "layer": "L0",
+      "attack": "replay",
+      "detections": 300,
+      "trials": 300,
+      "rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "replay:L1": {
+      "layer": "L1",
+      "attack": "replay",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "replay:L2": {
+      "layer": "L2",
+      "attack": "replay",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "replay:L3": {
+      "layer": "L3",
+      "attack": "replay",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "replay:ANY": {
+      "layer": "ANY",
+      "attack": "replay",
+      "detections": 300,
+      "trials": 300,
+      "rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "key_reuse:L0": {
+      "layer": "L0",
+      "attack": "key_reuse",
+      "detections": 300,
+      "trials": 300,
+      "rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "key_reuse:L1": {
+      "layer": "L1",
+      "attack": "key_reuse",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "key_reuse:L2": {
+      "layer": "L2",
+      "attack": "key_reuse",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "key_reuse:L3": {
+      "layer": "L3",
+      "attack": "key_reuse",
+      "detections": 0,
+      "trials": 300,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "key_reuse:ANY": {
+      "layer": "ANY",
+      "attack": "key_reuse",
+      "detections": 300,
+      "trials": 300,
+      "rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    }
+  },
+  "outcomes": {
+    "honest": {
+      "attack": "honest",
+      "trials": 300,
+      "protocol_accepted": 300,
+      "message_changed": 0,
+      "forgery_succeeded": 0,
+      "success_rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "defeated_by_protocol": false,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "paired_pauli_X": {
+      "attack": "paired_pauli_X",
+      "trials": 300,
+      "protocol_accepted": 300,
+      "message_changed": 300,
+      "forgery_succeeded": 300,
+      "success_rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "defeated_by_protocol": false,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "paired_pauli_Y": {
+      "attack": "paired_pauli_Y",
+      "trials": 300,
+      "protocol_accepted": 300,
+      "message_changed": 300,
+      "forgery_succeeded": 300,
+      "success_rate": 1.0,
+      "ci_low": 0.9877790253057065,
+      "ci_high": 1.0,
+      "defeated_by_protocol": false,
+      "formatted": "1.000 [0.988, 1.000] n=300"
+    },
+    "paired_pauli_Z": {
+      "attack": "paired_pauli_Z",
+      "trials": 300,
+      "protocol_accepted": 300,
+      "message_changed": 0,
+      "forgery_succeeded": 0,
+      "success_rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "defeated_by_protocol": false,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "unpaired_pauli": {
+      "attack": "unpaired_pauli",
+      "trials": 300,
+      "protocol_accepted": 0,
+      "message_changed": 300,
+      "forgery_succeeded": 0,
+      "success_rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "defeated_by_protocol": true,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "intercept_resend": {
+      "attack": "intercept_resend",
+      "trials": 300,
+      "protocol_accepted": 300,
+      "message_changed": 0,
+      "forgery_succeeded": 0,
+      "success_rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "defeated_by_protocol": false,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "replay": {
+      "attack": "replay",
+      "trials": 300,
+      "protocol_accepted": 300,
+      "message_changed": 0,
+      "forgery_succeeded": 0,
+      "success_rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "defeated_by_protocol": false,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    },
+    "key_reuse": {
+      "attack": "key_reuse",
+      "trials": 300,
+      "protocol_accepted": 300,
+      "message_changed": 0,
+      "forgery_succeeded": 0,
+      "success_rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.01222097469429355,
+      "defeated_by_protocol": false,
+      "formatted": "0.000 [0.000, 0.012] n=300"
+    }
+  }
+}
