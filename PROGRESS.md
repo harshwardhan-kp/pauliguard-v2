@@ -265,3 +265,64 @@ OPEN ITEMS THE USER MUST RESOLVE BEFORE SUBMITTING:
   3. Density is 430 words/slide vs the corpus winner median of 131.8. Deliberate (read deck),
      but slide 4 at 626 words is the outlier and is the one to trim if trimming.
   4. Body text runs 8.6-9pt in places, below the 10pt floor PHILOSOPHY.md recommends.
+
+## DEPLOYMENT — BOTH LIVE (2026-09-01)
+Split hosting, both green:
+  • Frontend  https://pauliguard-v2.vercel.app        (Vercel, static `web/`)
+  • Backend   https://pauliguard-v2-api.onrender.com  (Render Docker free, stim+FastAPI)
+The Vercel page reads "Backend Online" and pulls schemes/floor/runs from Render directly
+over CORS (`allow_origins=["*"]`), NOT via Vercel rewrites. `web/app.js` picks the target:
+`?api=` param > `window.PAULIGUARD_API_BASE` > localStorage > if hostname contains
+`vercel.app` use the Render URL > else same-origin. Same-origin is what makes
+https://pauliguard-v2-api.onrender.com/ work standalone as a full demo URL too.
+
+### The Vercel bug, and what it actually was
+Every deployment sat at CLI status `UNKNOWN` forever — CLI deploys included. This was
+misread for hours as a wedged build queue or as Vercel auto-detecting `pauliguard/api.py`
+as a FastAPI project and failing on the stim C++ wheel.
+
+Neither. `GET /v6/deployments` reported the real state, which the CLI does not surface:
+
+    "state": "BLOCKED",
+    "seatBlock": { "blockCode": "COMMIT_AUTHOR_REQUIRED" },
+    "errorMessage": "The Deployment was blocked because GitHub could not
+                     associate the committer with a GitHub user."
+
+This repo had NO git identity configured (neither local nor global), so git derived one
+from the hostname: `harshwardhan@harshwardhans-MacBook-Air.local`. That address belongs to
+no GitHub account, so Vercel's seat attribution refused to bill the build to anyone and
+blocked it pre-build. Duration `?`, `Builds [0ms]`, `vercel logs` empty — because no build
+ever started. CLI deploys were blocked identically (`"no git user associated with the
+commit"`) since the CLI attaches local commit metadata.
+
+Fix (48ac2b0): set the repo-local identity to the GitHub account's own address, then push.
+
+    git config user.name  "harshwardhan-kp"
+    git config user.email "harshw.kp@gmail.com"
+
+Next push deployed READY in 2s. All three aliases now resolve to it.
+
+DIAGNOSTIC LESSON: `vercel ls` renders a BLOCKED deployment as `UNKNOWN`. When a deploy
+hangs with no logs and no build duration, query the REST API before touching config —
+`framework: null`, `.vercelignore`, and the deleted/recreated project were all fixes for a
+problem that did not exist. They are harmless and are kept, but they were not the bug.
+
+### Config that must stay
+  • `vercel.json` — `{"outputDirectory":"web","cleanUrls":true,"framework":null}`.
+    `framework:null` still earns its place: without it Vercel detects `pauliguard/api.py`
+    (`variable: app`) as FastAPI and tries a Python build that stim will fail.
+  • `.vercelignore` — hides `pauliguard`, `render.yaml` is NOT ignored... see below.
+  • `render.yaml` — required by the Render blueprint, and it must stay hidden from Vercel
+    or Vercel's services detection errors with "Invalid vercel.json services pattern".
+  • SSO/deployment protection is DISABLED on the project. Re-enabling it 302s judges to a
+    vercel.com login. `vercel project protection disable pauliguard-v2 --sso`.
+
+### Still open
+  1. Git identity is REPO-LOCAL only. Any other repo on this machine will hit the same
+     Vercel block. `git config --global user.email harshw.kp@gmail.com` to fix machine-wide.
+  2. Render autoDeploy needs the owner to Connect GitHub once in the Render dashboard
+     (OAuth). Until then the API alone returns "repository URL is invalid".
+  3. REVOKE the Render API key `rnd_pSJm...` (Dashboard -> Account -> API Keys) — it was
+     used in plaintext during setup.
+  4. `/favicon.ico` 404s on the deployed page. Only console error; cosmetic.
+  5. Render free tier cold-starts (~50s) after 15 min idle. Warm it before judging.
