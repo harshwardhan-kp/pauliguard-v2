@@ -135,9 +135,13 @@
 
   // Allow split hosting: Vercel frontend -> Render backend.
   // Set window.PAULIGUARD_API_BASE or localStorage 'pauliguard_api_base' or ?api= param.
+  // Default to Render when on Vercel (CORS enabled on backend).
   const API_BASE = (function() {
     const qs = new URLSearchParams(window.location.search);
-    return qs.get('api') || window.PAULIGUARD_API_BASE || localStorage.getItem('pauliguard_api_base') || '';
+    const explicit = qs.get('api') || window.PAULIGUARD_API_BASE || localStorage.getItem('pauliguard_api_base');
+    if (explicit) return explicit;
+    if (window.location.hostname.includes('vercel.app')) return 'https://pauliguard-v2-api.onrender.com';
+    return '';
   })();
 
   function withBase(path) {

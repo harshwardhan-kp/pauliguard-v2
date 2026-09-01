@@ -1,0 +1,12 @@
+pauliguard
+spike
+tests
+tools
+docs
+deck
+results
+*.md
+Dockerfile
+.venv
+__pycache__
+*.pyc
