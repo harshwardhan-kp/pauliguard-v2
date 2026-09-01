@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: pauliguard-v2-api
+    runtime: docker
+    dockerDockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: singapore
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 10000
