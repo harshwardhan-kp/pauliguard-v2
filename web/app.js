@@ -133,9 +133,22 @@
   // API HELPERS
   // =========================================================================
 
+  // Allow split hosting: Vercel frontend -> Render backend.
+  // Set window.PAULIGUARD_API_BASE or localStorage 'pauliguard_api_base' or ?api= param.
+  const API_BASE = (function() {
+    const qs = new URLSearchParams(window.location.search);
+    return qs.get('api') || window.PAULIGUARD_API_BASE || localStorage.getItem('pauliguard_api_base') || '';
+  })();
+
+  function withBase(path) {
+    if (!API_BASE) return path;
+    return API_BASE.replace(/\/$/, '') + path;
+  }
+
   async function apiRequest(endpoint, options = {}) {
+    const url = withBase(endpoint);
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -156,8 +169,8 @@
 
       return await response.json();
     } catch (err) {
-      console.error(`API Error on ${endpoint}:`, err);
-      showError(`Request to ${endpoint} failed: ${err.message}`);
+      console.error(`API Error on ${url}:`, err);
+      showError(`Request to ${url} failed: ${err.message}`);
       throw err;
     }
   }
@@ -318,7 +331,7 @@
 
     try {
       elements.liveResultsStatusBadge.textContent = 'Analysing...';
-      const response = await fetch('/api/analyse_spec', {
+      const response = await fetch(withBase('/api/analyse_spec'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
