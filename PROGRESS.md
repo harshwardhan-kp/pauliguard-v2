@@ -358,3 +358,16 @@ changed, L0-L2 clear, L3 +XI dim4 1.0 16/16); Playwright (Chromium) full pass �
 auto-compare verdict, replay at n=3, offline preview, console page, zero JS
 errors; screenshots inspected pixel-level. `git status` scope: only the 3
 rewrites + console.* + fonts/ + this entry. Nothing committed until user said push.
+
+## 2026-09-04 (pm) — honest-run 422 + [object Object] banner (fixed, pushed)
+Symptom (prod + localhost): clicking Run honest showed
+`Honest run failed: [object Object]`. Root causes, both frontend in
+`web/app.js`: (1) honest payload sent `attack_pauli: null`, but `RunRequest`
+declares `attack_pauli: str` (not Optional) → FastAPI 422; compare path always
+sent `state.attack_pauli`, which is why only honest broke. (2) error formatter
+interpolated `errJson.detail` raw; 422 bodies carry it as an object/array.
+Fix: send `state.attack_pauli || "X"`; new `httpError(res)` helper stringifies
+non-string details; both `res.ok` branches use it. Backend untouched (verified
+`attack: null` returns 200 with `{layers, summary, trace}`). Playwright now
+clicks Run honest and asserts the honest verdict + no banner; full suite green,
+zero JS errors.

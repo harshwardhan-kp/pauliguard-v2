@@ -15,6 +15,22 @@
   const cleanBase = base ? base.replace(/\/+$/, "") : "";
   const apiUrl = (endpoint) => `${cleanBase}${endpoint}`;
 
+  // Build a readable Error from a failed fetch Response. FastAPI 422 bodies
+  // carry `detail` as an object/array, which must never reach the UI raw.
+  async function httpError(res) {
+    let detail = "";
+    try {
+      const body = await res.json();
+      if (body && body.detail !== undefined) {
+        detail = typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail);
+      }
+    } catch (_) {
+      detail = "";
+    }
+    const suffix = detail ? `: ${detail}` : "";
+    return new Error(`HTTP ${res.status} ${res.statusText}${suffix}`);
+  }
+
   // --------------------------------------------------------------------------
   // Application State & Defaults
   // --------------------------------------------------------------------------
@@ -401,8 +417,7 @@
       });
 
       if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.detail || `HTTP ${res.status}: ${res.statusText}`);
+        throw await httpError(res);
       }
 
       const data = await res.json();
@@ -433,7 +448,7 @@
         scheme: state.scheme,
         n_message_qubits: state.n_message_qubits,
         attack: null,
-        attack_pauli: null,
+        attack_pauli: state.attack_pauli || "X",
         noise_p: Number(state.noise_p) || 0.0,
         decoy_rounds: Number(state.decoy_rounds) || 4200,
         alpha: isNaN(alphaVal) ? 1e-10 : alphaVal,
@@ -447,8 +462,7 @@
       });
 
       if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.detail || `HTTP ${res.status}: ${res.statusText}`);
+        throw await httpError(res);
       }
 
       const data = await res.json();
