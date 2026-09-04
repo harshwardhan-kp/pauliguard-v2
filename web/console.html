@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PauliGuard — Quantum Signature Threat Detection</title>
+  <link rel="stylesheet" href="console.css">
+</head>
+<body>
+  <div id="app" class="app-container">
+
+    <!-- TOP HEADER & SYSTEM STATUS -->
+    <header class="top-header">
+      <div class="brand-group">
+        <div class="logo-badge">Ψ</div>
+        <div>
+          <h1 class="brand-title">PAULIGUARD</h1>
+          <p class="brand-subtitle">Quantum-Inspired Cyber Threat Detection for Digital Signature Security (SIH26141)</p>
+        </div>
+      </div>
+      <div class="system-status" id="systemStatus">
+        <div class="status-indicator">
+          <span class="status-dot online"></span>
+          <span id="backendStatus">Backend Online</span>
+        </div>
+        <div class="floor-badge" id="floorBadge" title="Measured QPU Hardware Floor">
+          <span class="floor-label">IBM Quantum Floor:</span>
+          <span class="floor-value mono" id="floorValue">0.03442</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- GLOBAL ERROR NOTIFICATION -->
+    <div id="globalError" class="global-error hidden" role="alert">
+      <span class="error-icon">⚠️</span>
+      <span id="errorMessage" class="error-message">Error message</span>
+      <button id="dismissErrorBtn" class="btn-icon" aria-label="Dismiss error">✕</button>
+    </div>
+
+    <!-- CONTROLS BAR -->
+    <section class="controls-bar" aria-label="Protocol and Execution Controls">
+      <div class="control-item control-item-scheme">
+        <label for="schemeSelect" class="control-label">Protocol Scheme</label>
+        <select id="schemeSelect" class="select-input" aria-label="Select Protocol Scheme">
+          <option value="" disabled selected>Loading schemes...</option>
+        </select>
+      </div>
+
+      <div class="control-item control-item-qubits">
+        <label for="qubitsInput" class="control-label">Message Qubits (<span class="mono">n</span>)</label>
+        <input type="number" id="qubitsInput" class="number-input mono" min="2" max="6" value="2" step="1">
+      </div>
+
+      <div class="control-item control-item-noise">
+        <div class="slider-header">
+          <label for="noiseSlider" class="control-label">Noise (<span class="mono">p</span>)</label>
+          <span id="noiseDisplay" class="slider-val mono">0.000</span>
+        </div>
+        <input type="range" id="noiseSlider" class="range-input" min="0" max="0.05" step="0.001" value="0.000">
+      </div>
+
+      <div class="control-item control-item-decoy">
+        <label for="decoyInput" class="control-label">Decoy Rounds (<span class="mono">k</span>)</label>
+        <input type="number" id="decoyInput" class="number-input mono" min="400" max="8000" step="100" value="4200">
+      </div>
+
+      <div class="control-item control-item-alpha">
+        <label for="alphaSelect" class="control-label">Significance (<span class="mono">α</span>)</label>
+        <select id="alphaSelect" class="select-input mono">
+          <option value="1e-3">1e-3</option>
+          <option value="1e-6">1e-6</option>
+          <option value="1e-10" selected>1e-10</option>
+        </select>
+      </div>
+
+      <div class="control-item control-item-pauli">
+        <label for="pauliSelect" class="control-label">Attack Pauli</label>
+        <select id="pauliSelect" class="select-input mono bold">
+          <option value="X" selected>X</option>
+          <option value="Y">Y</option>
+          <option value="Z">Z</option>
+        </select>
+      </div>
+
+      <div class="control-actions">
+        <button id="btnRunHonest" class="btn btn-secondary" title="Execute Honest Protocol Run">
+          RUN HONEST
+        </button>
+        <button id="btnRunForgery" class="btn btn-danger" title="Execute Paired-Pauli Forgery Run">
+          RUN FORGERY
+        </button>
+        <button id="btnRunCompare" class="btn btn-primary" title="Execute Honest & Forged Lockstep Comparison">
+          <span class="btn-bolt">⚡</span> RUN BOTH (compare)
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN THREE-COLUMN LAYOUT -->
+    <main class="main-layout">
+
+      <!-- LEFT COLUMN: PROTOCOL SPECIFICATION -->
+      <section class="column column-left" aria-labelledby="colSpecHeading">
+        <div class="column-header">
+          <h2 id="colSpecHeading" class="column-title">Protocol Specification</h2>
+          <span id="specFamilyBadge" class="badge badge-neutral">AQS</span>
+        </div>
+
+        <div class="spec-meta-card">
+          <div class="spec-meta-row">
+            <span class="meta-label">Citation:</span>
+            <div id="specCitation" class="spec-citation">Loading scheme citation...</div>
+          </div>
+          <div class="spec-tags-row" id="specTagsRow">
+            <span class="tag-pill" id="specEncryptionTag">Encryption: qotp</span>
+            <span class="tag-pill" id="specStepsTag">Steps: 6</span>
+            <span class="tag-pill" id="specDecoyTag">Decoy Protected: 50%</span>
+          </div>
+        </div>
+
+        <!-- LIVE SPEC EDITING TOOLBAR -->
+        <div class="editor-toolbar" aria-label="Spec Editor Actions">
+          <div class="toolbar-primary-row">
+            <button id="btnReanalyseSpec" class="btn btn-primary btn-sm" title="Re-analyse edited YAML spec in real time">
+              ⚡ RE-ANALYSE EDITED SPEC
+            </button>
+            <button id="btnResetSpec" class="btn btn-secondary btn-sm" title="Reset editor to on-disk original">
+              ↺ RESET TO ORIGINAL
+            </button>
+          </div>
+          <div class="toolbar-preset-row">
+            <span class="preset-label">MUTATE:</span>
+            <button id="btnAddSwapTestFix" class="btn btn-mutate btn-sm" title="Insert 8-copy SWAP test hardening block">
+              + ADD SWAP-TEST FIX
+            </button>
+            <button id="btnRemoveArbitratorCheck" class="btn btn-mutate btn-sm" title="Delete trent_verify_equality_predicate step">
+              - REMOVE ARBITRATOR CHECK
+            </button>
+          </div>
+        </div>
+
+        <!-- INLINE PARSE ERROR ALERT -->
+        <div id="specEditorError" class="spec-editor-error hidden" role="alert">
+          <span class="error-badge">PARSE ERROR</span>
+          <span id="specEditorErrorMsg" class="error-msg-text">Error details</span>
+        </div>
+
+        <!-- SPEC YAML PANE -->
+        <div class="pane-container pane-editor-container">
+          <div class="pane-header">
+            <span class="pane-title">SPECIFICATION YAML (EDITABLE)</span>
+            <button id="btnCopyYaml" class="btn-link" title="Copy YAML to clipboard">Copy</button>
+          </div>
+          <textarea id="yamlSpecPane" class="yaml-pane yaml-editor mono" spellcheck="false" aria-label="Specification YAML Editor" placeholder="Type or paste YAML specification here...">Loading YAML specification...</textarea>
+        </div>
+
+        <!-- LIVE ANALYSIS RESULTS STRIP -->
+        <div id="liveResultsStrip" class="live-results-strip">
+          <div class="results-strip-header">
+            <span class="results-strip-title">LIVE ANALYSIS RESULTS</span>
+            <span id="liveResultsStatusBadge" class="results-status-badge">Initial Spec</span>
+          </div>
+          <div class="results-grid">
+            <div class="result-cell">
+              <span class="result-label">Malleability Dim</span>
+              <span id="resMalDim" class="result-value mono bold">4</span>
+            </div>
+            <div class="result-cell">
+              <span class="result-label">Certificates</span>
+              <span id="resCertCount" class="result-value mono bold">1</span>
+            </div>
+            <div class="result-cell">
+              <span class="result-label">Honest Accept</span>
+              <span id="resHonestRate" class="result-value mono bold text-success">1.000</span>
+            </div>
+            <div class="result-cell">
+              <span class="result-label">Forgery Rate</span>
+              <div class="rate-with-delta">
+                <span id="resForgeryRate" class="result-value mono bold text-danger">1.000</span>
+                <span id="resForgeryDelta" class="delta-badge delta-neutral">—</span>
+              </div>
+            </div>
+            <div class="result-cell result-cell-wide">
+              <span class="result-label">Dispute Findings</span>
+              <span id="resDisputeCount" class="result-value mono">0 findings</span>
+            </div>
+          </div>
+          <div id="resDegradedNotice" class="degraded-notice hidden">
+            <span id="resDegradedText">Stabilizer limitation notice</span>
+          </div>
+        </div>
+
+        <!-- HONESTY DISPLAY: ASSUMED FIELDS -->
+        <div class="assumed-fields-card">
+          <div class="assumed-header">
+            <span class="honesty-icon">⚖️</span>
+            <h3 class="assumed-title">Fields we had to assume</h3>
+          </div>
+          <p class="assumed-desc">Deliberate honesty disclosure for parameters not explicitly defined in the published paper:</p>
+          <ul id="assumedFieldsList" class="assumed-list">
+            <li class="assumed-item">Loading assumptions...</li>
+          </ul>
+        </div>
+
+        <!-- SPEC VALIDATION WARNINGS (IF ANY) -->
+        <div id="specWarningsContainer" class="warnings-container hidden">
+          <div class="warning-title">⚠️ Specification Warnings</div>
+          <ul id="specWarningsList" class="warnings-list"></ul>
+        </div>
+      </section>
+
+      <!-- CENTRE COLUMN: EXECUTION & THE MONEY SHOT -->
+      <section class="column column-centre" aria-labelledby="colExecHeading">
+        <div class="column-header">
+          <h2 id="colExecHeading" class="column-title">Execution (Lockstep Analysis)</h2>
+          <span id="runModeBadge" class="badge badge-accent">Ready</span>
+        </div>
+
+        <!-- THE MONEY SHOT BANNER -->
+        <div id="moneyShotBanner" class="money-shot-banner hidden" role="region" aria-label="Attack Detection Verdict">
+          <div class="money-shot-inner">
+            <div class="money-shot-top-tag">
+              <span class="money-shot-tag-pill">CRITICAL FINDING</span>
+              <span class="money-shot-tag-alert">STRUCTURAL BLINDNESS IDENTIFIED</span>
+            </div>
+            <div class="money-shot-text">
+              SIGNATURE ACCEPTED &nbsp;•&nbsp; MESSAGE CHANGED &nbsp;•&nbsp; L0/L1/L2 SAW NOTHING
+            </div>
+            <div class="money-shot-subtext">
+              decoy error rates identical — statistically indistinguishable
+              <span id="moneyShotQberDetail" class="mono">(honest: 0.03310 vs forged: 0.03524 · within Serfling threshold τ)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- HONEST RUN PANEL (TOP) -->
+        <div id="honestPanel" class="exec-panel exec-panel-honest">
+          <div class="exec-panel-header">
+            <div class="panel-tag-group">
+              <span class="panel-run-type">HONEST RUN</span>
+              <span class="panel-attack-label mono" id="honestAttackLabel">attack: none</span>
+            </div>
+            <div id="honestStatusBadge" class="panel-status-pill pill-pass">SIGNATURE ACCEPTED</div>
+          </div>
+
+          <div class="message-flow">
+            <div class="message-box">
+              <span class="message-label">Alice Sent:</span>
+              <div id="honestAliceChips" class="chips-container">
+                <span class="chip chip-empty">—</span>
+              </div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="message-box">
+              <span class="message-label">Bob Received:</span>
+              <div id="honestBobChips" class="chips-container">
+                <span class="chip chip-empty">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-footer">
+            <div class="rate-stat">
+              <span class="rate-label">Decoy Error Rate:</span>
+              <span id="honestDecoyRate" class="rate-val mono">0.03310</span>
+            </div>
+            <div id="honestStatusText" class="status-summary-text text-intact">
+              SIGNATURE ACCEPTED — message intact
+            </div>
+          </div>
+        </div>
+
+        <!-- ATTACKED RUN PANEL (BOTTOM) -->
+        <div id="attackedPanel" class="exec-panel exec-panel-attacked">
+          <div class="exec-panel-header">
+            <div class="panel-tag-group">
+              <span class="panel-run-type">ATTACKED RUN</span>
+              <span class="panel-attack-label mono" id="attackedAttackLabel">attack: paired_pauli (X)</span>
+            </div>
+            <div id="attackedStatusBadge" class="panel-status-pill pill-pass">SIGNATURE ACCEPTED</div>
+          </div>
+
+          <div class="message-flow">
+            <div class="message-box">
+              <span class="message-label">Alice Sent:</span>
+              <div id="forgedAliceChips" class="chips-container">
+                <span class="chip chip-empty">—</span>
+              </div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="message-box">
+              <span class="message-label">Bob Received:</span>
+              <div id="forgedBobChips" class="chips-container">
+                <span class="chip chip-empty">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-footer">
+            <div class="rate-stat">
+              <span class="rate-label">Decoy Error Rate:</span>
+              <span id="forgedDecoyRate" class="rate-val mono">0.03524</span>
+            </div>
+            <div id="attackedStatusText" class="status-summary-text text-changed">
+              SIGNATURE ACCEPTED — message CHANGED
+            </div>
+          </div>
+        </div>
+
+        <!-- CERTIFICATE PANEL (APPEARS ONLY WHEN L3 FIRES) -->
+        <div id="certificatePanel" class="certificate-panel hidden" role="region" aria-label="Algebraic Malleability Certificate">
+          <div class="cert-header">
+            <div class="cert-title-group">
+              <span class="cert-icon">📜</span>
+              <h3 class="cert-title">Layer 3 Algebraic Malleability Certificate</h3>
+            </div>
+            <span class="cert-badge">CONFIRMED BY EXECUTION</span>
+          </div>
+
+          <div class="cert-grid">
+            <div class="cert-stat-item">
+              <span class="cert-stat-label">Witness Pauli (<span class="mono">U</span>)</span>
+              <span id="certWitnessPauli" class="cert-stat-value mono bold text-danger">+XI</span>
+            </div>
+            <div class="cert-stat-item">
+              <span class="cert-stat-label">Required Signature (<span class="mono">V</span>)</span>
+              <span id="certSignaturePauli" class="cert-stat-value mono bold text-danger">+XI</span>
+            </div>
+            <div class="cert-stat-item">
+              <span class="cert-stat-label">Malleability Dimension</span>
+              <span id="certMalleabilityDim" class="cert-stat-value mono bold">4</span>
+            </div>
+            <div class="cert-stat-item">
+              <span class="cert-stat-label">Success Probability</span>
+              <span id="certSuccessProb" class="cert-stat-value mono bold text-danger">1.0 (100%)</span>
+            </div>
+            <div class="cert-stat-item cert-stat-span2">
+              <span class="cert-stat-label">Execution Confirmation</span>
+              <span id="certExecutionSummary" class="cert-stat-value mono text-success">Confirmed: 16/16 accepted, 16/16 message changed</span>
+            </div>
+            <div class="cert-stat-item cert-stat-span2">
+              <span class="cert-stat-label">Target Predicate & Signs</span>
+              <span id="certPredicateSigns" class="cert-stat-value mono">E_{k}|P> == |S> &nbsp;·&nbsp; signs: [-1, 1]</span>
+            </div>
+          </div>
+
+          <div class="cert-explanation-box">
+            <span class="cert-subheading">Plain English Analysis:</span>
+            <p id="certExplanation" class="cert-explanation-text">—</p>
+          </div>
+
+          <!-- MANDATORY HONESTY CAVEAT: SOUND, NOT COMPLETE -->
+          <div class="cert-caveat-box">
+            <div class="caveat-header">
+              <span class="caveat-badge">HONESTY STATEMENT · SOUND, NOT COMPLETE</span>
+            </div>
+            <p id="certCaveat" class="caveat-text">
+              L3 is sound, not complete. This certificate proves the existence of an algebraic attack,
+              but "no malleability found" is NOT a proof of security. The search covers the Pauli group
+              modulo phase only; a general adversary may use an arbitrary CPTP map outside this search.
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT COLUMN: DETECTION LAYERS -->
+      <section class="column column-right" aria-labelledby="colLayersHeading">
+        <div class="column-header">
+          <h2 id="colLayersHeading" class="column-title">Detection Layers</h2>
+          <span class="badge badge-neutral">4-Layer Pipeline</span>
+        </div>
+
+        <div class="layers-container">
+
+          <!-- L0 CARD: CONFORMANCE -->
+          <div id="cardL0" class="layer-card">
+            <div class="layer-card-top">
+              <div>
+                <div class="layer-id-row">
+                  <h3 class="layer-name">L0 Conformance</h3>
+                  <span class="threshold-pill">no threshold</span>
+                </div>
+                <p class="layer-desc">Deterministic protocol conformance & step validation</p>
+              </div>
+              <div id="pillL0" class="layer-status-pill pill-pass">PASS</div>
+            </div>
+
+            <div class="layer-stat-row">
+              <span class="stat-caption">Test Statistic:</span>
+              <span id="statL0" class="stat-value mono">Deterministic predicate (0 findings)</span>
+            </div>
+
+            <div class="derivation-accordion">
+              <button class="btn-toggle-derivation" data-target="derivationL0" aria-expanded="false">
+                <span>Why did you decide that?</span>
+                <span class="toggle-icon">▾</span>
+              </button>
+              <div id="derivationL0" class="derivation-body hidden mono">
+                no threshold - deterministic predicate
+              </div>
+            </div>
+          </div>
+
+          <!-- L1 CARD: CHANNEL STATISTICS -->
+          <div id="cardL1" class="layer-card">
+            <div class="layer-card-top">
+              <div>
+                <div class="layer-id-row">
+                  <h3 class="layer-name">L1 Channel Statistics</h3>
+                  <span class="threshold-pill threshold-pill-serfling">Serfling τ Bound</span>
+                </div>
+                <p class="layer-desc">Finite-population concentration on decoy state QBER</p>
+              </div>
+              <div id="pillL1" class="layer-status-pill pill-pass">PASS</div>
+            </div>
+
+            <div class="layer-stat-row">
+              <span class="stat-caption">Decoy Rate vs Floor:</span>
+              <span id="statL1" class="stat-value mono">x̄ = 0.03452, floor = 0.03442, τ = 0.04534</span>
+            </div>
+
+            <div class="derivation-accordion">
+              <button class="btn-toggle-derivation" data-target="derivationL1" aria-expanded="false">
+                <span>Why did you decide that?</span>
+                <span class="toggle-icon">▾</span>
+              </button>
+              <div id="derivationL1" class="derivation-body hidden mono">
+                Awaiting execution...
+              </div>
+            </div>
+          </div>
+
+          <!-- L2 CARD: ENTANGLEMENT QUALITY -->
+          <div id="cardL2" class="layer-card">
+            <div class="layer-card-top">
+              <div>
+                <div class="layer-id-row">
+                  <h3 class="layer-name">L2 Entanglement Quality</h3>
+                  <span class="threshold-pill threshold-pill-azuma">Azuma-Hoeffding</span>
+                </div>
+                <p class="layer-desc">Martingale concentration bound on Bell state fidelity</p>
+              </div>
+              <div id="pillL2" class="layer-status-pill pill-pass">PASS</div>
+            </div>
+
+            <div class="layer-stat-row">
+              <span class="stat-caption">Stabilizer Fraction:</span>
+              <span id="statL2" class="stat-value mono">p̂ = 1.0000, threshold = 0.6786</span>
+            </div>
+
+            <div class="derivation-accordion">
+              <button class="btn-toggle-derivation" data-target="derivationL2" aria-expanded="false">
+                <span>Why did you decide that?</span>
+                <span class="toggle-icon">▾</span>
+              </button>
+              <div id="derivationL2" class="derivation-body hidden mono">
+                Awaiting execution...
+              </div>
+            </div>
+          </div>
+
+          <!-- L3 CARD: ALGEBRAIC MALLEABILITY -->
+          <div id="cardL3" class="layer-card">
+            <div class="layer-card-top">
+              <div>
+                <div class="layer-id-row">
+                  <h3 class="layer-name">L3 Algebraic Malleability</h3>
+                  <span class="threshold-pill">no threshold</span>
+                </div>
+                <p class="layer-desc">GF(2) symplectic nullspace search for invariant Pauli commutators</p>
+              </div>
+              <div id="pillL3" class="layer-status-pill pill-pass">CLEAR</div>
+            </div>
+
+            <!-- L3 LIVE STAT / SUMMARY -->
+            <div class="layer-stat-row">
+              <span class="stat-caption">Nullspace Status:</span>
+              <span id="statL3" class="stat-value mono">no threshold — algebraic search</span>
+            </div>
+
+            <!-- L3 CERTIFICATE PREVIEW (EXPANDS WHEN MALLEABILITY DETECTED) -->
+            <div id="l3CertSummary" class="l3-cert-summary hidden">
+              <div class="l3-summary-grid">
+                <div class="l3-summary-item">
+                  <span class="l3-label">Witness:</span>
+                  <span id="l3WitnessText" class="mono bold text-danger">+XI</span>
+                </div>
+                <div class="l3-summary-item">
+                  <span class="l3-label">Required V:</span>
+                  <span id="l3VText" class="mono bold text-danger">+XI</span>
+                </div>
+                <div class="l3-summary-item">
+                  <span class="l3-label">Malleability Dim:</span>
+                  <span id="l3DimText" class="mono bold">4</span>
+                </div>
+                <div class="l3-summary-item">
+                  <span class="l3-label">Success Prob:</span>
+                  <span id="l3ProbText" class="mono bold text-danger">1.0 (100%)</span>
+                </div>
+              </div>
+              <div id="l3ExecConfirmText" class="l3-confirm-line mono text-success">
+                Confirmed by execution: 16/16 accepted, 16/16 message changed
+              </div>
+            </div>
+
+            <div class="derivation-accordion">
+              <button class="btn-toggle-derivation" data-target="derivationL3" aria-expanded="false">
+                <span>Why did you decide that?</span>
+                <span class="toggle-icon">▾</span>
+              </button>
+              <div id="derivationL3" class="derivation-body hidden mono">
+                no threshold - algebraic search
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="console.js"></script>
+</body>
+</html>

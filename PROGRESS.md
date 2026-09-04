@@ -326,3 +326,35 @@ problem that did not exist. They are harmless and are kept, but they were not th
      used in plaintext during setup.
   4. `/favicon.ico` 404s on the deployed page. Only console error; cosmetic.
   5. Render free tier cold-starts (~50s) after 15 min idle. Warm it before judging.
+
+## 2026-09-04 — Judge-mode UI rebuild (dossier) + expert console split
+Supervisor: Muse Code (Muse Spark). Workers: `agy` + `agy2` (gemini-3.8-flash-high)
+for bulk files; typography/grounds re-theme done directly by supervisor per user order.
+
+**Why:** the single-page console (6 knobs + YAML + L0-L3 math at once) drowned
+non-quantum judges. New structure, same backend, zero backend changes:
+  • `web/index.html|styles.css|app.js` REWRITTEN — threat-dossier landing for judges:
+    hero verdict, score strip, Exhibit A/B lockstep, cross-examination rows with
+    `why` derivations, replay (scheme cards + n stepper + advanced details),
+    methodology footer with verbatim sound-not-complete line, amber OFFLINE
+    PREVIEW state with [CACHED EXAMPLE] tags when backend unreachable.
+  • `web/console.html|console.js|console.css` NEW — byte-identical expert console
+    from git HEAD (`console.js` verified `cmp`-clean vs old `app.js`), linked as
+    [CONSOLE]. Old YAML editing / mutate buttons / derivations live on here only.
+  • `web/fonts/` NEW — self-hosted OFL faces, no CDN: Instrument Serif 400+italic,
+    Schibsted Grotesk (variable 400-700 latin). Design tokens + palette + ink-only
+    verdict doctrine taken from `~/Claude/grounds/src/app/globals.css` (ground
+    #eeeeee, ink #000, red #e10909 reserved for defects; green removed from all
+    verdict paths, kept nowhere — online dot is ink too).
+  • Broke stale hard links: `web/{index.html,styles.css,app.js}` were hardlinked
+    into `.vercel/output/static/` (local build cache). `cp`+`mv` re-inoded the
+    working files; bytes unchanged. `.vercelignore` does not exclude `web/fonts`,
+    so faces deploy.
+
+**Verified (this session, independent of workers):** `node --check` both JS files;
+40/40 `getElementById` refs resolve in new HTML; live-backend contract check
+(`TestClient`: compare honest [0,1]->[0,1] intact / forged [0,1]->[1,1] accepted+
+changed, L0-L2 clear, L3 +XI dim4 1.0 16/16); Playwright (Chromium) full pass —
+auto-compare verdict, replay at n=3, offline preview, console page, zero JS
+errors; screenshots inspected pixel-level. `git status` scope: only the 3
+rewrites + console.* + fonts/ + this entry. Nothing committed until user said push.

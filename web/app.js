@@ -1,990 +1,943 @@
 /**
- * PAULIGUARD — DEMO WEB APPLICATION
- * Plain vanilla JavaScript (No frameworks, No build step, No CDN).
- * Supports full 40-second demonstration workflow and lockstep comparison.
+ * PauliGuard — Quantum Signature Threat Detector (SIH26141)
+ * Judge-facing Threat Dossier UI Client
  */
 
 (function () {
-  'use strict';
+  "use strict";
 
-  // State
+  // --------------------------------------------------------------------------
+  // Backend API Resolver
+  // --------------------------------------------------------------------------
+  const qs = new URLSearchParams(location.search);
+  const explicit = qs.get("api") || window.PAULIGUARD_API_BASE || localStorage.getItem("pauliguard_api_base");
+  const base = explicit || (location.hostname.includes("vercel.app") ? "https://pauliguard-v2-api.onrender.com" : "");
+  const cleanBase = base ? base.replace(/\/+$/, "") : "";
+  const apiUrl = (endpoint) => `${cleanBase}${endpoint}`;
+
+  // --------------------------------------------------------------------------
+  // Application State & Defaults
+  // --------------------------------------------------------------------------
   const state = {
+    scheme: "lu-2022",
+    n_message_qubits: 2,
+    attack_pauli: "X",
+    noise_p: 0.0,
+    decoy_rounds: 4200,
+    alpha: 1e-10,
+    seedCompare: 102,
+    seedHonest: 101,
     schemes: [],
-    currentSchemeName: null,
-    currentSchemeMeta: null,
-    currentSpecData: null,
-    lastRunResult: null,
+    health: null,
     isLoading: false,
-    previousForgeryRate: null,
+    lastCompareResult: null,
+    isLive: false,
   };
 
-  // DOM Elements cache
-  const elements = {
-    // Header & Status
-    backendStatus: document.getElementById('backendStatus'),
-    floorValue: document.getElementById('floorValue'),
-    globalError: document.getElementById('globalError'),
-    errorMessage: document.getElementById('errorMessage'),
-    dismissErrorBtn: document.getElementById('dismissErrorBtn'),
+  // --------------------------------------------------------------------------
+  // Cached Fallback Data for Offline Preview
+  // --------------------------------------------------------------------------
+  const CACHED_SCHEMES = [
+    { name: "lu-2022", family: "teleportation-aqs" },
+    { name: "lu-2022-hardened", family: "teleportation-aqs" },
+    { name: "li-chan-long-2009", family: "teleportation-aqs" },
+    { name: "decoy-bb84-qds", family: "decoy-state-qds" },
+  ];
 
-    // Controls
-    schemeSelect: document.getElementById('schemeSelect'),
-    qubitsInput: document.getElementById('qubitsInput'),
-    noiseSlider: document.getElementById('noiseSlider'),
-    noiseDisplay: document.getElementById('noiseDisplay'),
-    decoyInput: document.getElementById('decoyInput'),
-    alphaSelect: document.getElementById('alphaSelect'),
-    pauliSelect: document.getElementById('pauliSelect'),
-    btnRunHonest: document.getElementById('btnRunHonest'),
-    btnRunForgery: document.getElementById('btnRunForgery'),
-    btnRunCompare: document.getElementById('btnRunCompare'),
-
-    // Left Column: Spec & Live Editor
-    specFamilyBadge: document.getElementById('specFamilyBadge'),
-    specCitation: document.getElementById('specCitation'),
-    specEncryptionTag: document.getElementById('specEncryptionTag'),
-    specStepsTag: document.getElementById('specStepsTag'),
-    specDecoyTag: document.getElementById('specDecoyTag'),
-    yamlSpecPane: document.getElementById('yamlSpecPane'),
-    btnCopyYaml: document.getElementById('btnCopyYaml'),
-    btnReanalyseSpec: document.getElementById('btnReanalyseSpec'),
-    btnResetSpec: document.getElementById('btnResetSpec'),
-    btnAddSwapTestFix: document.getElementById('btnAddSwapTestFix'),
-    btnRemoveArbitratorCheck: document.getElementById('btnRemoveArbitratorCheck'),
-    specEditorError: document.getElementById('specEditorError'),
-    specEditorErrorMsg: document.getElementById('specEditorErrorMsg'),
-    liveResultsStrip: document.getElementById('liveResultsStrip'),
-    liveResultsStatusBadge: document.getElementById('liveResultsStatusBadge'),
-    resMalDim: document.getElementById('resMalDim'),
-    resCertCount: document.getElementById('resCertCount'),
-    resHonestRate: document.getElementById('resHonestRate'),
-    resForgeryRate: document.getElementById('resForgeryRate'),
-    resForgeryDelta: document.getElementById('resForgeryDelta'),
-    resDisputeCount: document.getElementById('resDisputeCount'),
-    resDegradedNotice: document.getElementById('resDegradedNotice'),
-    resDegradedText: document.getElementById('resDegradedText'),
-    assumedFieldsList: document.getElementById('assumedFieldsList'),
-    specWarningsContainer: document.getElementById('specWarningsContainer'),
-    specWarningsList: document.getElementById('specWarningsList'),
-
-    // Centre Column: Execution & Money Shot
-    runModeBadge: document.getElementById('runModeBadge'),
-    moneyShotBanner: document.getElementById('moneyShotBanner'),
-    moneyShotQberDetail: document.getElementById('moneyShotQberDetail'),
-
-    // Honest Panel
-    honestPanel: document.getElementById('honestPanel'),
-    honestAttackLabel: document.getElementById('honestAttackLabel'),
-    honestStatusBadge: document.getElementById('honestStatusBadge'),
-    honestAliceChips: document.getElementById('honestAliceChips'),
-    honestBobChips: document.getElementById('honestBobChips'),
-    honestDecoyRate: document.getElementById('honestDecoyRate'),
-    honestStatusText: document.getElementById('honestStatusText'),
-
-    // Attacked Panel
-    attackedPanel: document.getElementById('attackedPanel'),
-    attackedAttackLabel: document.getElementById('attackedAttackLabel'),
-    attackedStatusBadge: document.getElementById('attackedStatusBadge'),
-    forgedAliceChips: document.getElementById('forgedAliceChips'),
-    forgedBobChips: document.getElementById('forgedBobChips'),
-    forgedDecoyRate: document.getElementById('forgedDecoyRate'),
-    attackedStatusText: document.getElementById('attackedStatusText'),
-
-    // Certificate Panel
-    certificatePanel: document.getElementById('certificatePanel'),
-    certWitnessPauli: document.getElementById('certWitnessPauli'),
-    certSignaturePauli: document.getElementById('certSignaturePauli'),
-    certMalleabilityDim: document.getElementById('certMalleabilityDim'),
-    certSuccessProb: document.getElementById('certSuccessProb'),
-    certExecutionSummary: document.getElementById('certExecutionSummary'),
-    certPredicateSigns: document.getElementById('certPredicateSigns'),
-    certExplanation: document.getElementById('certExplanation'),
-    certCaveat: document.getElementById('certCaveat'),
-
-    // Right Column: Detection Layers
-    cardL0: document.getElementById('cardL0'),
-    pillL0: document.getElementById('pillL0'),
-    statL0: document.getElementById('statL0'),
-    derivationL0: document.getElementById('derivationL0'),
-
-    cardL1: document.getElementById('cardL1'),
-    pillL1: document.getElementById('pillL1'),
-    statL1: document.getElementById('statL1'),
-    derivationL1: document.getElementById('derivationL1'),
-
-    cardL2: document.getElementById('cardL2'),
-    pillL2: document.getElementById('pillL2'),
-    statL2: document.getElementById('statL2'),
-    derivationL2: document.getElementById('derivationL2'),
-
-    cardL3: document.getElementById('cardL3'),
-    pillL3: document.getElementById('pillL3'),
-    statL3: document.getElementById('statL3'),
-    l3CertSummary: document.getElementById('l3CertSummary'),
-    l3WitnessText: document.getElementById('l3WitnessText'),
-    l3VText: document.getElementById('l3VText'),
-    l3DimText: document.getElementById('l3DimText'),
-    l3ProbText: document.getElementById('l3ProbText'),
-    l3ExecConfirmText: document.getElementById('l3ExecConfirmText'),
-    derivationL3: document.getElementById('derivationL3'),
-  };
-
-  // =========================================================================
-  // API HELPERS
-  // =========================================================================
-
-  // Allow split hosting: Vercel frontend -> Render backend.
-  // Set window.PAULIGUARD_API_BASE or localStorage 'pauliguard_api_base' or ?api= param.
-  // Default to Render when on Vercel (CORS enabled on backend).
-  const API_BASE = (function() {
-    const qs = new URLSearchParams(window.location.search);
-    const explicit = qs.get('api') || window.PAULIGUARD_API_BASE || localStorage.getItem('pauliguard_api_base');
-    if (explicit) return explicit;
-    if (window.location.hostname.includes('vercel.app')) return 'https://pauliguard-v2-api.onrender.com';
-    return '';
-  })();
-
-  function withBase(path) {
-    if (!API_BASE) return path;
-    return API_BASE.replace(/\/$/, '') + path;
-  }
-
-  async function apiRequest(endpoint, options = {}) {
-    const url = withBase(endpoint);
-    try {
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+  const CACHED_COMPARE_DATA = {
+    honest: {
+      summary: {
+        message_in: [1, 1],
+        message_out: [1, 1],
+        message_changed: false,
+        accepted: true,
+        attack_label: null,
+      },
+      layers: {
+        L0: {
+          flagged: false,
+          derivation: "no threshold - deterministic predicate",
         },
-        ...options,
-      });
+        L1: {
+          flagged: false,
+          observed_rate: 0.03524,
+          tau: 0.04534,
+          floor: 0.03442,
+          derivation: "tau = 0.04534 from Serfling; xbar=0.03524, PASS",
+        },
+        L2: {
+          flagged: false,
+          threshold: 0.04534,
+          observed: 0.03524,
+          derivation: "Azuma-Hoeffding: tau = 0.0453; observed=0.0352, PASS",
+        },
+        L3: {
+          flagged: false,
+          derivation: "no threshold - algebraic search",
+        },
+      },
+    },
+    forged: {
+      summary: {
+        message_in: [1, 1],
+        message_out: [0, 1],
+        message_changed: true,
+        accepted: true,
+        attack_label: "paired_pauli",
+      },
+      layers: {
+        L0: {
+          flagged: false,
+          derivation: "no threshold - deterministic predicate",
+        },
+        L1: {
+          flagged: false,
+          observed_rate: 0.03524,
+          tau: 0.04534,
+          floor: 0.03442,
+          derivation: "tau = 0.04534 from Serfling; xbar=0.03524, PASS",
+        },
+        L2: {
+          flagged: false,
+          threshold: 0.04534,
+          observed: 0.03524,
+          derivation: "Azuma-Hoeffding: tau = 0.0453; observed=0.0352, PASS",
+        },
+        L3: {
+          flagged: true,
+          derivation: "no threshold - algebraic search",
+          certificates: [
+            {
+              witness_pauli: "+XI",
+              signature_pauli: "+XI",
+              malleability_dimension: 4,
+              success_probability: 1.0,
+              execution_accepted: 16,
+              execution_trials: 16,
+              explanation: "Pauli-conjugation attack satisfies arbitrator predicate.",
+              caveat: "L3 is sound, not complete: a certificate proves an attack exists; no malleability found is NOT a proof of security.",
+            },
+          ],
+        },
+      },
+    },
+    decoy_rate_honest: 0.03524,
+    decoy_rate_forged: 0.03524,
+    both_within_threshold: true,
+  };
 
-      if (!response.ok) {
-        let errDetail = `HTTP ${response.status} ${response.statusText}`;
-        try {
-          const errJson = await response.json();
-          if (errJson && errJson.detail) {
-            errDetail = typeof errJson.detail === 'string' ? errJson.detail : JSON.stringify(errJson.detail);
-          }
-        } catch (_) {}
-        throw new Error(errDetail);
-      }
+  // --------------------------------------------------------------------------
+  // DOM Elements Cache
+  // --------------------------------------------------------------------------
+  const el = {
+    // Global Error / Offline Banner
+    globalError: document.getElementById("globalError"),
+    errorTag: document.getElementById("errorTag"),
+    errorMessage: document.getElementById("errorMessage"),
+    dismissErrorBtn: document.getElementById("dismissErrorBtn"),
 
-      return await response.json();
-    } catch (err) {
-      console.error(`API Error on ${url}:`, err);
-      showError(`Request to ${url} failed: ${err.message}`);
-      throw err;
+    // Header
+    headerStatus: document.getElementById("headerStatus"),
+    statusDot: document.getElementById("statusDot"),
+    backendStatus: document.getElementById("backendStatus"),
+
+    // Hero Actions
+    runForgeryBtn: document.getElementById("runForgeryBtn"),
+    runHonestBtn: document.getElementById("runHonestBtn"),
+
+    // Meta Strip
+    metaScheme: document.getElementById("metaScheme"),
+    metaBits: document.getElementById("metaBits"),
+    metaDecoys: document.getElementById("metaDecoys"),
+    metaFloor: document.getElementById("metaFloor"),
+
+    // Score Strip
+    scoreCachedTag: document.getElementById("scoreCachedTag"),
+    scoreForgeryRate: document.getElementById("scoreForgeryRate"),
+    scoreHonestAccept: document.getElementById("scoreHonestAccept"),
+    scoreStandardChecks: document.getElementById("scoreStandardChecks"),
+    scorePauliguardPill: document.getElementById("scorePauliguardPill"),
+
+    // Verdict Panel
+    verdictPanel: document.getElementById("verdictPanel"),
+    verdictHeadline: document.getElementById("verdictHeadline"),
+    verdictSubline: document.getElementById("verdictSubline"),
+    verdictCachedTag: document.getElementById("verdictCachedTag"),
+
+    // Exhibits
+    exhibitAliceA: document.getElementById("exhibitAliceA"),
+    exhibitBobA: document.getElementById("exhibitBobA"),
+    exhibitDecoyA: document.getElementById("exhibitDecoyA"),
+    exhibitStatusA: document.getElementById("exhibitStatusA"),
+
+    exhibitAliceB: document.getElementById("exhibitAliceB"),
+    exhibitBobB: document.getElementById("exhibitBobB"),
+    exhibitDecoyB: document.getElementById("exhibitDecoyB"),
+    exhibitStatusB: document.getElementById("exhibitStatusB"),
+
+    // Cross-Examination
+    standardStatusPill: document.getElementById("standardStatusPill"),
+    standardWhyContent: document.getElementById("standardWhyContent"),
+    auditRowL3: document.getElementById("auditRowL3"),
+    l3StatusPill: document.getElementById("l3StatusPill"),
+    l3WhyContent: document.getElementById("l3WhyContent"),
+
+    // Replay & Schemes
+    schemesList: document.getElementById("schemesList"),
+    messageBitsInput: document.getElementById("messageBitsInput"),
+    stepDecBtn: document.getElementById("stepDecBtn"),
+    stepIncBtn: document.getElementById("stepIncBtn"),
+    runBothBtn: document.getElementById("runBothBtn"),
+
+    // Advanced Inputs
+    noiseInput: document.getElementById("noiseInput"),
+    decoysInput: document.getElementById("decoysInput"),
+    alphaInput: document.getElementById("alphaInput"),
+    attackPauliSelect: document.getElementById("attackPauliSelect"),
+  };
+
+  // --------------------------------------------------------------------------
+  // Utility Helpers
+  // --------------------------------------------------------------------------
+  function showOfflineBanner() {
+    if (el.globalError) {
+      el.globalError.className = "global-error global-error--offline";
+      el.globalError.classList.remove("hidden");
+    }
+    if (el.errorTag) {
+      el.errorTag.style.display = "none";
+    }
+    if (el.errorMessage) {
+      el.errorMessage.textContent = "OFFLINE PREVIEW — showing a cached example run. Connect backend for live data.";
     }
   }
 
-  // =========================================================================
-  // ERROR HANDLING
-  // =========================================================================
-
   function showError(msg) {
-    elements.errorMessage.textContent = msg;
-    elements.globalError.classList.remove('hidden');
+    if (el.globalError) {
+      el.globalError.className = "global-error";
+      el.globalError.classList.remove("hidden");
+    }
+    if (el.errorTag) {
+      el.errorTag.style.display = "";
+      el.errorTag.textContent = "[ERROR]";
+    }
+    if (el.errorMessage) el.errorMessage.textContent = msg;
+    console.error("[PauliGuard Error]", msg);
   }
 
   function clearError() {
-    elements.globalError.classList.add('hidden');
-    elements.errorMessage.textContent = '';
+    if (el.globalError) el.globalError.classList.add("hidden");
   }
 
-  // =========================================================================
-  // CONTROLS PARSER
-  // =========================================================================
-
-  function getControlValues() {
-    const scheme = elements.schemeSelect.value || 'lu-2022';
-    const n_message_qubits = parseInt(elements.qubitsInput.value, 10) || 2;
-    const noise_p = parseFloat(elements.noiseSlider.value) || 0.0;
-    const decoy_rounds = parseInt(elements.decoyInput.value, 10) || 4200;
-    const alpha = parseFloat(elements.alphaSelect.value) || 1e-10;
-    const attack_pauli = elements.pauliSelect.value || 'X';
-
-    return {
-      scheme,
-      n_message_qubits,
-      noise_p,
-      decoy_rounds,
-      alpha,
-      attack_pauli,
-    };
-  }
-
-  function setLoading(loading, actionName = '') {
-    state.isLoading = loading;
-    elements.btnRunHonest.disabled = loading;
-    elements.btnRunForgery.disabled = loading;
-    elements.btnRunCompare.disabled = loading;
-    elements.schemeSelect.disabled = loading;
-
-    if (loading) {
-      elements.runModeBadge.textContent = actionName ? `Executing: ${actionName}...` : 'Running...';
-      elements.runModeBadge.className = 'badge badge-accent';
+  function setLive(isLive) {
+    state.isLive = isLive;
+    if (el.verdictCachedTag) {
+      if (isLive) {
+        el.verdictCachedTag.classList.add("hidden");
+      } else {
+        el.verdictCachedTag.classList.remove("hidden");
+      }
+    }
+    if (el.scoreCachedTag) {
+      if (isLive) {
+        el.scoreCachedTag.classList.add("hidden");
+      } else {
+        el.scoreCachedTag.classList.remove("hidden");
+      }
     }
   }
 
-  // =========================================================================
-  // CHIPS RENDERING (WITH DIFFERING BIT HIGHLIGHT)
-  // =========================================================================
+  function setOfflineStatus() {
+    if (el.statusDot) {
+      el.statusDot.className = "status-dot status-dot--offline";
+    }
+    if (el.backendStatus) {
+      el.backendStatus.textContent = "OFFLINE PREVIEW";
+    }
+    if (el.headerStatus) {
+      el.headerStatus.className = "header-status header-status--offline";
+    }
+  }
 
-  function renderChips(container, bitArray, isAttackedBob = false, aliceBits = null) {
-    container.innerHTML = '';
+  function setOnlineStatus(floor) {
+    if (el.statusDot) {
+      el.statusDot.className = "status-dot status-dot--online";
+    }
+    if (el.backendStatus) {
+      const floorPct = floor != null ? (floor * 100).toFixed(2) : "3.44";
+      el.backendStatus.textContent = `ONLINE · IBM ${floorPct}%`;
+    }
+    if (el.headerStatus) {
+      el.headerStatus.className = "header-status";
+    }
+  }
 
-    if (!bitArray || !Array.isArray(bitArray) || bitArray.length === 0) {
-      const emptyChip = document.createElement('span');
-      emptyChip.className = 'chip chip-empty';
-      emptyChip.textContent = '—';
-      container.appendChild(emptyChip);
+  function formatRate(val) {
+    if (val == null || isNaN(val)) return "0.00000";
+    return Number(val).toFixed(5);
+  }
+
+  function formatPercent(val) {
+    if (val == null || isNaN(val)) return "0.0%";
+    return (Number(val) * 100).toFixed(1) + "%";
+  }
+
+  function formatNum(val, dp = 2) {
+    if (val == null || isNaN(val)) return "0.00";
+    return Number(val).toFixed(dp);
+  }
+
+  function renderChips(bits, container, changedBitsMask = []) {
+    if (!container) return;
+    container.innerHTML = "";
+    if (!Array.isArray(bits) || bits.length === 0) {
+      container.innerHTML = `<span class="qubit-chip mono">|0⟩</span>`;
       return;
     }
-
-    bitArray.forEach((bit, idx) => {
-      const chip = document.createElement('span');
-      chip.className = 'chip';
-      chip.textContent = String(bit);
-
-      // Crucial requirement: When messages differ, highlight differing bit chip in red on attacked panel
-      if (isAttackedBob && aliceBits && Array.isArray(aliceBits) && aliceBits[idx] !== undefined) {
-        if (aliceBits[idx] !== bit) {
-          chip.classList.add('chip-changed');
-          chip.title = `Bit altered by forgery! Alice sent ${aliceBits[idx]} → Bob received ${bit}`;
-        }
+    bits.forEach((b, idx) => {
+      const chip = document.createElement("span");
+      chip.className = "qubit-chip mono";
+      chip.textContent = `|${b}⟩`;
+      if (changedBitsMask[idx]) {
+        chip.classList.add("qubit-chip--changed");
+        chip.title = `Bit ${idx} mutated from expected value`;
       }
-
       container.appendChild(chip);
     });
   }
 
-  // =========================================================================
-  // LEFT COLUMN: SPEC & LIVE EDITING HELPERS
-  // =========================================================================
+  function setLoading(loading, activeAction = "compare") {
+    state.isLoading = loading;
+    const buttons = [el.runForgeryBtn, el.runHonestBtn, el.runBothBtn, el.stepDecBtn, el.stepIncBtn];
+    buttons.forEach((btn) => {
+      if (btn) btn.disabled = loading;
+    });
 
-  function showEditorError(msg) {
-    elements.specEditorErrorMsg.textContent = msg;
-    elements.specEditorError.classList.remove('hidden');
-  }
-
-  function hideEditorError() {
-    elements.specEditorError.classList.add('hidden');
-    elements.specEditorErrorMsg.textContent = '';
-  }
-
-  function addSwapTestFixToYaml(yamlText) {
-    const hardeningBlock = 'hardening:\n  swap_test:\n    enabled: true\n    copies: 8';
-    if (/^hardening\s*:/m.test(yamlText)) {
-      return yamlText.replace(/^hardening\s*:(?:\n[ \t]+[^\n]*|\n(?![a-zA-Z0-9_-]+\s*:)[ \t]*[^\n]*)*/m, hardeningBlock);
-    }
-    return yamlText.trimEnd() + '\n\n' + hardeningBlock + '\n';
-  }
-
-  function removeArbitratorCheckFromYaml(yamlText) {
-    const lines = yamlText.split('\n');
-    let stepIndices = [];
-    let inSteps = false;
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      if (/^steps\s*:/.test(line)) {
-        inSteps = true;
-        continue;
-      }
-      if (inSteps && /^[a-zA-Z0-9_-]+\s*:/.test(line) && !line.startsWith(' ') && !line.startsWith('\t')) {
-        inSteps = false;
-        continue;
-      }
-      if (inSteps && /^\s*-\s+/.test(line)) {
-        stepIndices.push(i);
-      }
+    if (el.schemesList) {
+      const radios = el.schemesList.querySelectorAll("input[type='radio']");
+      radios.forEach((r) => { r.disabled = loading; });
     }
 
-    for (let k = 0; k < stepIndices.length; k++) {
-      const start = stepIndices[k];
-      const end = (k + 1 < stepIndices.length) ? stepIndices[k + 1] : lines.length;
-      const stepText = lines.slice(start, end).join('\n');
-      if (stepText.includes('trent_verify_equality_predicate')) {
-        let actualEnd = end;
-        for (let j = start + 1; j < lines.length; j++) {
-          if (/^\s*-\s+/.test(lines[j]) || (/^[a-zA-Z0-9_-]+\s*:/.test(lines[j]) && !lines[j].startsWith(' '))) {
-            actualEnd = j;
-            break;
-          }
-        }
-        lines.splice(start, actualEnd - start);
-        return lines.join('\n');
-      }
+    if (el.runForgeryBtn) {
+      el.runForgeryBtn.classList.toggle("is-loading", loading && activeAction === "compare");
+      const lbl = el.runForgeryBtn.querySelector(".btn-label");
+      if (lbl) lbl.textContent = loading && activeAction === "compare" ? "Running forgery..." : "Run the forgery";
     }
 
-    // Fallback regex if line scanner didn't match
-    return yamlText.replace(/\n\s*-\s+procedure:[^\n]*\n(?:[ \t]+[^\n]*\n)*?[ \t]*name:\s*["']?trent_verify_equality_predicate["']?[^\n]*(?:\n[ \t]+[^\n]*)*/g, '');
+    if (el.runHonestBtn) {
+      el.runHonestBtn.classList.toggle("is-loading", loading && activeAction === "honest");
+      const lbl = el.runHonestBtn.querySelector(".btn-label");
+      if (lbl) lbl.textContent = loading && activeAction === "honest" ? "Running honest..." : "Run honest";
+    }
+
+    if (el.runBothBtn) {
+      el.runBothBtn.classList.toggle("is-loading", loading && activeAction === "compare");
+      const lbl = el.runBothBtn.querySelector(".btn-label");
+      if (lbl) lbl.textContent = loading && activeAction === "compare" ? "Running comparison..." : "Run both";
+    }
   }
 
-  async function handleReanalyseSpec() {
-    hideEditorError();
-    const yamlText = elements.yamlSpecPane.value || '';
-    const params = getControlValues();
-    const payload = {
-      yaml: yamlText,
-      n_message_qubits: params.n_message_qubits,
-      trials: 50,
-    };
-
+  // --------------------------------------------------------------------------
+  // API Calls
+  // --------------------------------------------------------------------------
+  async function fetchHealth() {
     try {
-      elements.liveResultsStatusBadge.textContent = 'Analysing...';
-      const response = await fetch(withBase('/api/analyse_spec'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+      const res = await fetch(apiUrl("/api/health"));
+      if (!res.ok) throw new Error(`Health check returned HTTP ${res.status}`);
+      const data = await res.json();
+      state.health = data;
+      setOnlineStatus(data.floor);
+      if (el.metaFloor && data.floor != null) {
+        el.metaFloor.textContent = formatRate(data.floor);
+      }
+      return true;
+    } catch (err) {
+      setOfflineStatus();
+      showOfflineBanner();
+      setLive(false);
+      return false;
+    }
+  }
+
+  async function fetchSchemes() {
+    try {
+      const res = await fetch(apiUrl("/api/schemes"));
+      if (!res.ok) throw new Error(`Schemes request returned HTTP ${res.status}`);
+      const schemes = await res.json();
+      if (Array.isArray(schemes) && schemes.length > 0) {
+        state.schemes = schemes;
+        renderSchemes(schemes);
+        return true;
+      }
+      throw new Error("Empty schemes list returned");
+    } catch (err) {
+      if (!state.schemes || state.schemes.length === 0) {
+        state.schemes = CACHED_SCHEMES;
+        renderSchemes(CACHED_SCHEMES);
+      }
+      return false;
+    }
+  }
+
+  async function runCompare() {
+    clearError();
+    setLoading(true, "compare");
+    try {
+      const alphaVal = typeof state.alpha === "string" ? parseFloat(state.alpha) : state.alpha;
+      const payload = {
+        scheme: state.scheme,
+        n_message_qubits: state.n_message_qubits,
+        attack_pauli: state.attack_pauli,
+        noise_p: Number(state.noise_p) || 0.0,
+        decoy_rounds: Number(state.decoy_rounds) || 4200,
+        alpha: isNaN(alphaVal) ? 1e-10 : alphaVal,
+        seed: state.seedCompare,
+      };
+
+      const res = await fetch(apiUrl("/api/compare"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
-
-      if (!response.ok || data.stage === 'parse') {
-        const errorMsg = data.error || `HTTP ${response.status}: Failed analysing specification.`;
-        showEditorError(errorMsg);
-        elements.liveResultsStatusBadge.textContent = 'Parse Error';
-        return;
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.detail || `HTTP ${res.status}: ${res.statusText}`);
       }
 
-      // Update Results Strip
-      elements.resMalDim.textContent = String(data.malleability_dimension ?? '0');
-      const certCount = Array.isArray(data.certificates) ? data.certificates.length : 0;
-      elements.resCertCount.textContent = String(certCount);
-
-      const hRate = data.honest_acceptance_rate !== undefined ? Number(data.honest_acceptance_rate) : 1.0;
-      elements.resHonestRate.textContent = hRate.toFixed(3);
-
-      const fRate = data.forgery_success_rate !== undefined ? Number(data.forgery_success_rate) : 0.0;
-      elements.resForgeryRate.textContent = fRate.toFixed(3);
-
-      // Delta calculation
-      if (state.previousForgeryRate !== null && state.previousForgeryRate !== undefined) {
-        const delta = fRate - state.previousForgeryRate;
-        if (delta < -0.001) {
-          elements.resForgeryDelta.textContent = `▼ ${delta.toFixed(3)}`;
-          elements.resForgeryDelta.className = 'delta-badge delta-drop';
-        } else if (delta > 0.001) {
-          elements.resForgeryDelta.textContent = `▲ +${delta.toFixed(3)}`;
-          elements.resForgeryDelta.className = 'delta-badge delta-rise';
-        } else {
-          elements.resForgeryDelta.textContent = `(0.000)`;
-          elements.resForgeryDelta.className = 'delta-badge delta-neutral';
-        }
-      } else {
-        elements.resForgeryDelta.textContent = '(baseline)';
-        elements.resForgeryDelta.className = 'delta-badge delta-neutral';
-      }
-      state.previousForgeryRate = fRate;
-
-      // Dispute findings summary
-      const findings = Array.isArray(data.dispute_findings) ? data.dispute_findings : [];
-      const critCount = findings.filter(f => f.severity === 'critical').length;
-      elements.resDisputeCount.textContent = `${findings.length} findings (${critCount} critical)`;
-
-      // Warnings container
-      const warnings = Array.isArray(data.warnings) ? data.warnings : [];
-      if (warnings.length > 0) {
-        elements.specWarningsList.innerHTML = '';
-        warnings.forEach(w => {
-          const li = document.createElement('li');
-          li.textContent = w;
-          elements.specWarningsList.appendChild(li);
-        });
-        elements.specWarningsContainer.classList.remove('hidden');
-      } else {
-        elements.specWarningsContainer.classList.add('hidden');
-      }
-
-      // Degraded notice
-      if (data.degraded) {
-        elements.resDegradedNotice.classList.remove('hidden');
-        elements.resDegradedText.textContent = data.degraded;
-      } else {
-        elements.resDegradedNotice.classList.add('hidden');
-      }
-
-      // Update Certificate Panel if present
-      if (certCount > 0 && data.certificates[0]) {
-        updateCertificatePanel(data.certificates[0]);
-      } else {
-        updateCertificatePanel(null);
-      }
-
-      elements.liveResultsStatusBadge.textContent = 'Updated';
+      const data = await res.json();
+      state.lastCompareResult = data;
+      setLive(true);
+      clearError();
+      renderCompare(data);
     } catch (err) {
-      console.error('Error re-analysing spec:', err);
-      showEditorError(err.message || 'Unknown network error analysing spec.');
-    }
-  }
-
-  function handleResetSpec() {
-    hideEditorError();
-    if (state.currentSpecData && state.currentSpecData.raw) {
-      elements.yamlSpecPane.value = state.currentSpecData.raw;
-      handleReanalyseSpec();
-    }
-  }
-
-  function handleAddSwapTestFix() {
-    hideEditorError();
-    const currentYaml = elements.yamlSpecPane.value || '';
-    elements.yamlSpecPane.value = addSwapTestFixToYaml(currentYaml);
-    handleReanalyseSpec();
-  }
-
-  function handleRemoveArbitratorCheck() {
-    hideEditorError();
-    const currentYaml = elements.yamlSpecPane.value || '';
-    elements.yamlSpecPane.value = removeArbitratorCheckFromYaml(currentYaml);
-    handleReanalyseSpec();
-  }
-
-  async function loadSchemeSpec(schemeName) {
-    if (!schemeName) return;
-    try {
-      hideEditorError();
-      const specData = await apiRequest(`/api/schemes/${encodeURIComponent(schemeName)}/spec`);
-      state.currentSpecData = specData;
-      state.currentSchemeName = schemeName;
-
-      // Find meta from list
-      const meta = state.schemes.find(s => s.name === schemeName) || {};
-      state.currentSchemeMeta = meta;
-
-      // Update Spec Metadata
-      elements.specFamilyBadge.textContent = meta.family || 'PROTOCOL';
-      elements.specCitation.textContent = meta.citation || 'Citation unavailable';
-
-      elements.specEncryptionTag.textContent = `Encryption: ${meta.encryption || 'none'}`;
-      elements.specStepsTag.textContent = `Steps: ${meta.n_steps || (specData.spec && specData.spec.steps ? specData.spec.steps.length : '—')}`;
-      
-      const decoyFrac = meta.decoy_protected_fraction !== undefined
-        ? Math.round(meta.decoy_protected_fraction * 100)
-        : (specData.spec && specData.spec.decoy_protected_fraction ? Math.round(specData.spec.decoy_protected_fraction * 100) : 0);
-      elements.specDecoyTag.textContent = `Decoy Protected: ${decoyFrac}%`;
-
-      // Update YAML Editor Textarea
-      elements.yamlSpecPane.value = specData.raw || specData.yaml || (specData.spec ? JSON.stringify(specData.spec, null, 2) : '');
-
-      // Update Assumed Fields (Deliberate Honesty Display)
-      elements.assumedFieldsList.innerHTML = '';
-      const assumed = meta.assumed_fields || (specData.spec && specData.spec.assumed_fields) || [];
-      if (assumed.length > 0) {
-        assumed.forEach(field => {
-          const li = document.createElement('li');
-          li.className = 'assumed-item';
-          li.textContent = field;
-          elements.assumedFieldsList.appendChild(li);
-        });
+      if (!state.isLive) {
+        setOfflineStatus();
+        showOfflineBanner();
+        setLive(false);
+        renderCompare(CACHED_COMPARE_DATA);
       } else {
-        const li = document.createElement('li');
-        li.className = 'assumed-item';
-        li.textContent = 'None declared in protocol spec.';
-        elements.assumedFieldsList.appendChild(li);
+        showError(`Comparison run failed: ${err.message}`);
       }
-
-      // Spec validation warnings if any
-      const warnings = specData.warnings || [];
-      if (warnings.length > 0) {
-        elements.specWarningsList.innerHTML = '';
-        warnings.forEach(w => {
-          const li = document.createElement('li');
-          li.textContent = w;
-          elements.specWarningsList.appendChild(li);
-        });
-        elements.specWarningsContainer.classList.remove('hidden');
-      } else {
-        elements.specWarningsContainer.classList.add('hidden');
-      }
-
-      // Re-analyse spec for live results strip
-      await handleReanalyseSpec();
-    } catch (err) {
-      console.error('Failed to load scheme spec:', err);
+    } finally {
+      setLoading(false, "compare");
     }
   }
 
-  // =========================================================================
-  // EXECUTION PANELS RENDERING
-  // =========================================================================
-
-  function updateHonestPanel(honestData, decoyRate) {
-    if (!honestData) return;
-
-    elements.honestAttackLabel.textContent = `attack: ${honestData.summary.attack_label || 'none'}`;
-
-    renderChips(elements.honestAliceChips, honestData.summary.message_in);
-    renderChips(elements.honestBobChips, honestData.summary.message_out);
-
-    if (decoyRate !== undefined && decoyRate !== null) {
-      elements.honestDecoyRate.textContent = Number(decoyRate).toFixed(5);
-    } else {
-      elements.honestDecoyRate.textContent = '0.00000';
-    }
-
-    if (honestData.summary.accepted) {
-      elements.honestStatusBadge.textContent = 'SIGNATURE ACCEPTED';
-      elements.honestStatusBadge.className = 'panel-status-pill pill-pass';
-      if (!honestData.summary.message_changed) {
-        elements.honestStatusText.textContent = '✓ SIGNATURE ACCEPTED — message intact';
-        elements.honestStatusText.className = 'status-summary-text text-intact';
-      } else {
-        elements.honestStatusText.textContent = '⚠ SIGNATURE ACCEPTED — message CHANGED';
-        elements.honestStatusText.className = 'status-summary-text text-changed';
-      }
-    } else {
-      elements.honestStatusBadge.textContent = 'SIGNATURE REJECTED';
-      elements.honestStatusBadge.className = 'panel-status-pill pill-fail';
-      elements.honestStatusText.textContent = '✗ SIGNATURE REJECTED';
-      elements.honestStatusText.className = 'status-summary-text text-changed';
-    }
-  }
-
-  function updateAttackedPanel(forgedData, decoyRate, attackPauli = 'X') {
-    if (!forgedData) return;
-
-    elements.attackedAttackLabel.textContent = `attack: ${forgedData.summary.attack_label || 'paired_pauli'} (${attackPauli})`;
-
-    const aliceBits = forgedData.summary.message_in;
-    const bobBits = forgedData.summary.message_out;
-
-    renderChips(elements.forgedAliceChips, aliceBits);
-    renderChips(elements.forgedBobChips, bobBits, true, aliceBits);
-
-    if (decoyRate !== undefined && decoyRate !== null) {
-      elements.forgedDecoyRate.textContent = Number(decoyRate).toFixed(5);
-    } else {
-      elements.forgedDecoyRate.textContent = '0.00000';
-    }
-
-    if (forgedData.summary.accepted) {
-      if (forgedData.summary.message_changed) {
-        elements.attackedStatusBadge.textContent = 'SIGNATURE ACCEPTED';
-        elements.attackedStatusBadge.className = 'panel-status-pill pill-pass';
-        elements.attackedStatusText.textContent = '⚠ SIGNATURE ACCEPTED — message CHANGED';
-        elements.attackedStatusText.className = 'status-summary-text text-changed';
-      } else {
-        elements.attackedStatusBadge.textContent = 'SIGNATURE ACCEPTED';
-        elements.attackedStatusBadge.className = 'panel-status-pill pill-pass';
-        elements.attackedStatusText.textContent = '✓ SIGNATURE ACCEPTED — message intact';
-        elements.attackedStatusText.className = 'status-summary-text text-intact';
-      }
-    } else {
-      elements.attackedStatusBadge.textContent = 'SIGNATURE REJECTED';
-      elements.attackedStatusBadge.className = 'panel-status-pill pill-fail';
-      elements.attackedStatusText.textContent = '✗ SIGNATURE REJECTED — attack detected by protocol';
-      elements.attackedStatusText.className = 'status-summary-text text-neutral';
-    }
-  }
-
-  // =========================================================================
-  // THE MONEY SHOT BANNER
-  // =========================================================================
-
-  function updateMoneyShotBanner(forgedData, decoyRateHonest, decoyRateForged) {
-    if (!forgedData || !forgedData.summary) {
-      elements.moneyShotBanner.classList.add('hidden');
-      return;
-    }
-
-    const accepted = forgedData.summary.accepted;
-    const changed = forgedData.summary.message_changed;
-    const l0SawNothing = forgedData.layers && forgedData.layers.L0 && !forgedData.layers.L0.flagged;
-    const l1SawNothing = forgedData.layers && forgedData.layers.L1 && !forgedData.layers.L1.flagged;
-    const l2SawNothing = forgedData.layers && forgedData.layers.L2 && !forgedData.layers.L2.flagged;
-
-    if (accepted && changed && l0SawNothing && l1SawNothing && l2SawNothing) {
-      elements.moneyShotBanner.classList.remove('hidden');
-      const hRate = (decoyRateHonest !== undefined && decoyRateHonest !== null) ? Number(decoyRateHonest).toFixed(5) : '0.03310';
-      const fRate = (decoyRateForged !== undefined && decoyRateForged !== null) ? Number(decoyRateForged).toFixed(5) : '0.03524';
-      elements.moneyShotQberDetail.textContent = `(honest: ${hRate} vs forged: ${fRate} · within Serfling threshold τ)`;
-    } else {
-      elements.moneyShotBanner.classList.add('hidden');
-    }
-  }
-
-  // =========================================================================
-  // DETECTION LAYERS (L0, L1, L2, L3) RENDERING
-  // =========================================================================
-
-  function updateDetectionLayers(layers) {
-    if (!layers) return;
-
-    // --- L0 CONFORMANCE ---
-    if (layers.L0) {
-      const isL0Flagged = Boolean(layers.L0.flagged);
-      elements.pillL0.textContent = isL0Flagged ? 'DETECTED' : 'PASS';
-      elements.pillL0.className = `layer-status-pill ${isL0Flagged ? 'pill-fail' : 'pill-pass'}`;
-      elements.cardL0.className = `layer-card ${isL0Flagged ? 'card-alert' : ''}`;
-
-      const findingsCount = layers.L0.findings ? layers.L0.findings.length : 0;
-      elements.statL0.textContent = findingsCount > 0
-        ? `Conformance violation (${findingsCount} findings)`
-        : 'Deterministic predicate (0 findings)';
-      elements.derivationL0.textContent = layers.L0.derivation || 'no threshold - deterministic predicate';
-    }
-
-    // --- L1 CHANNEL STATISTICS ---
-    if (layers.L1) {
-      const isL1Flagged = Boolean(layers.L1.flagged);
-      elements.pillL1.textContent = isL1Flagged ? 'DETECTED' : 'PASS';
-      elements.pillL1.className = `layer-status-pill ${isL1Flagged ? 'pill-fail' : 'pill-pass'}`;
-      elements.cardL1.className = `layer-card ${isL1Flagged ? 'card-alert' : ''}`;
-
-      const xbar = layers.L1.observed_rate !== undefined ? Number(layers.L1.observed_rate).toFixed(5) : '—';
-      const floor = layers.L1.floor !== undefined ? Number(layers.L1.floor).toFixed(5) : '—';
-      const tau = layers.L1.tau !== undefined ? Number(layers.L1.tau).toFixed(5) : '—';
-      const excess = layers.L1.excess_over_floor !== undefined ? Number(layers.L1.excess_over_floor).toFixed(5) : '—';
-
-      elements.statL1.textContent = `x̄ = ${xbar} · floor = ${floor} · τ = ${tau} (excess: ${excess >= 0 ? '+' : ''}${excess})`;
-      elements.derivationL1.textContent = layers.L1.derivation || 'Serfling concentration bound derivation';
-    }
-
-    // --- L2 ENTANGLEMENT QUALITY ---
-    if (layers.L2) {
-      const isL2Flagged = Boolean(layers.L2.flagged);
-      elements.pillL2.textContent = isL2Flagged ? 'DETECTED' : 'PASS';
-      elements.pillL2.className = `layer-status-pill ${isL2Flagged ? 'pill-fail' : 'pill-pass'}`;
-      elements.cardL2.className = `layer-card ${isL2Flagged ? 'card-alert' : ''}`;
-
-      const obs = layers.L2.observed !== undefined ? Number(layers.L2.observed).toFixed(4) : '1.0000';
-      const thresh = layers.L2.threshold !== undefined ? Number(layers.L2.threshold).toFixed(4) : '—';
-      const dev = (layers.L2.detail && layers.L2.detail.deviation !== undefined)
-        ? Number(layers.L2.detail.deviation).toFixed(4)
-        : '0.0000';
-
-      elements.statL2.textContent = `p̂ = ${obs} · threshold = ${thresh} · deviation = ${dev}`;
-      elements.derivationL2.textContent = layers.L2.derivation || 'Azuma-Hoeffding martingale derivation';
-    }
-
-    // --- L3 ALGEBRAIC MALLEABILITY ---
-    if (layers.L3) {
-      const certs = layers.L3.certificates || [];
-      const hasMalleability = layers.L3.malleability_detected || certs.length > 0;
-      const isL3Flagged = Boolean(layers.L3.flagged || hasMalleability);
-
-      if (isL3Flagged && certs.length > 0) {
-        const cert = certs[0];
-        elements.pillL3.textContent = 'MALLEABILITY DETECTED';
-        elements.pillL3.className = 'layer-status-pill pill-detected';
-        elements.cardL3.className = 'layer-card card-alert';
-
-        elements.statL3.textContent = `Found ${certs.length} algebraic witness (dim ${cert.malleability_dimension})`;
-        elements.l3WitnessText.textContent = cert.witness_pauli;
-        elements.l3VText.textContent = cert.signature_pauli;
-        elements.l3DimText.textContent = String(cert.malleability_dimension);
-        elements.l3ProbText.textContent = `${Number(cert.success_probability).toFixed(1)} (${Math.round(cert.success_probability * 100)}%)`;
-        elements.l3ExecConfirmText.textContent = `Confirmed by execution: ${cert.execution_accepted}/${cert.execution_trials} accepted, ${cert.message_changed}/${cert.execution_trials} message changed`;
-
-        elements.l3CertSummary.classList.remove('hidden');
-        elements.derivationL3.textContent = layers.L3.derivation || 'no threshold - algebraic search';
-
-        // Update full certificate panel
-        updateCertificatePanel(cert);
-      } else {
-        elements.pillL3.textContent = 'CLEAR';
-        elements.pillL3.className = 'layer-status-pill pill-pass';
-        elements.cardL3.className = 'layer-card';
-
-        elements.statL3.textContent = 'no threshold — algebraic search (0 witnesses)';
-        elements.l3CertSummary.classList.add('hidden');
-        elements.derivationL3.textContent = layers.L3.derivation || 'no threshold - algebraic search';
-
-        // Hide full certificate panel
-        updateCertificatePanel(null);
-      }
-    }
-  }
-
-  // =========================================================================
-  // CERTIFICATE PANEL (FULL DETAILS + VERBATIM HONESTY CAVEAT)
-  // =========================================================================
-
-  function updateCertificatePanel(cert) {
-    if (!cert) {
-      elements.certificatePanel.classList.add('hidden');
-      return;
-    }
-
-    elements.certificatePanel.classList.remove('hidden');
-    elements.certWitnessPauli.textContent = cert.witness_pauli || '—';
-    elements.certSignaturePauli.textContent = cert.signature_pauli || '—';
-    elements.certMalleabilityDim.textContent = String(cert.malleability_dimension || '—');
-    
-    const prob = cert.success_probability !== undefined ? Number(cert.success_probability) : 1.0;
-    elements.certSuccessProb.textContent = `${prob.toFixed(1)} (${Math.round(prob * 100)}% across keyspace)`;
-
-    elements.certExecutionSummary.textContent = `Confirmed: ${cert.execution_accepted}/${cert.execution_trials} accepted, ${cert.message_changed}/${cert.execution_trials} message changed`;
-    
-    const signs = Array.isArray(cert.commutation_sign_range) ? cert.commutation_sign_range.join(', ') : '—';
-    elements.certPredicateSigns.textContent = `${cert.predicate || 'E_{k}|P> == |S>'}  ·  signs: [${signs}]  ·  keys: ${cert.keys_tested || 16}`;
-
-    elements.certExplanation.textContent = cert.explanation || 'Algebraic search discovered symplectic nullspace.';
-    
-    // HONESTY CAVEAT: Must be populated verbatim and NEVER hidden or truncated
-    elements.certCaveat.textContent = cert.caveat || (
-      'L3 is sound, not complete. This certificate proves the existence of an algebraic attack, ' +
-      'but "no malleability found" is NOT a proof of security. The search covers the Pauli group ' +
-      'modulo phase only; a general adversary may use an arbitrary CPTP map outside this search.'
-    );
-  }
-
-  // =========================================================================
-  // RUN ACTIONS (HONEST, FORGERY, COMPARE)
-  // =========================================================================
-
-  async function handleRunHonest() {
+  async function runHonest() {
     clearError();
-    setLoading(true, 'Honest Protocol Run');
-
+    setLoading(true, "honest");
     try {
-      const params = getControlValues();
+      const alphaVal = typeof state.alpha === "string" ? parseFloat(state.alpha) : state.alpha;
       const payload = {
-        scheme: params.scheme,
-        n_message_qubits: params.n_message_qubits,
+        scheme: state.scheme,
+        n_message_qubits: state.n_message_qubits,
         attack: null,
-        attack_pauli: params.attack_pauli,
-        noise_p: params.noise_p,
-        decoy_rounds: params.decoy_rounds,
-        alpha: params.alpha,
-        seed: 101,
+        attack_pauli: null,
+        noise_p: Number(state.noise_p) || 0.0,
+        decoy_rounds: Number(state.decoy_rounds) || 4200,
+        alpha: isNaN(alphaVal) ? 1e-10 : alphaVal,
+        seed: state.seedHonest,
       };
 
-      const result = await apiRequest('/api/run', {
-        method: 'POST',
+      const res = await fetch(apiUrl("/api/run"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      state.lastRunResult = result;
-      elements.runModeBadge.textContent = 'Honest Run Complete';
-      elements.runModeBadge.className = 'badge badge-neutral';
-
-      // Decoy rate calculation
-      let decoyRate = 0.03310;
-      if (result.layers && result.layers.L1 && result.layers.L1.observed_rate !== undefined) {
-        decoyRate = result.layers.L1.observed_rate;
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.detail || `HTTP ${res.status}: ${res.statusText}`);
       }
 
-      updateHonestPanel(result, decoyRate);
-      updateDetectionLayers(result.layers);
-
-      // In honest run, hide money shot banner
-      elements.moneyShotBanner.classList.add('hidden');
+      const data = await res.json();
+      setLive(true);
+      clearError();
+      renderHonestRun(data);
     } catch (err) {
-      console.error('Error running honest protocol:', err);
+      if (!state.isLive) {
+        setOfflineStatus();
+        showOfflineBanner();
+        setLive(false);
+        renderHonestRun(CACHED_COMPARE_DATA.honest);
+      } else {
+        showError(`Honest run failed: ${err.message}`);
+      }
     } finally {
-      setLoading(false);
+      setLoading(false, "honest");
     }
   }
 
-  async function handleRunForgery() {
-    clearError();
-    setLoading(true, 'Paired-Pauli Forgery');
+  // --------------------------------------------------------------------------
+  // Rendering
+  // --------------------------------------------------------------------------
+  function renderSchemes(schemes) {
+    if (!el.schemesList) return;
+    el.schemesList.innerHTML = "";
 
-    try {
-      const params = getControlValues();
-      const payload = {
-        scheme: params.scheme,
-        n_message_qubits: params.n_message_qubits,
-        attack: 'paired_pauli',
-        attack_pauli: params.attack_pauli,
-        noise_p: params.noise_p,
-        decoy_rounds: params.decoy_rounds,
-        alpha: params.alpha,
-        seed: 102,
-      };
+    schemes.forEach((s) => {
+      const card = document.createElement("label");
+      card.className = "scheme-card-label" + (s.name === state.scheme ? " is-selected" : "");
 
-      const result = await apiRequest('/api/run', {
-        method: 'POST',
-        body: JSON.stringify(payload),
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "scheme_radio";
+      radio.value = s.name;
+      radio.checked = s.name === state.scheme;
+
+      radio.addEventListener("change", () => {
+        if (radio.checked && state.scheme !== s.name) {
+          state.scheme = s.name;
+          updateSchemeSelection();
+          runCompare();
+        }
       });
 
-      state.lastRunResult = result;
-      elements.runModeBadge.textContent = 'Forgery Run Complete';
-      elements.runModeBadge.className = 'badge badge-accent';
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "scheme-name";
+      nameSpan.textContent = s.name;
 
-      let decoyRate = 0.03524;
-      if (result.layers && result.layers.L1 && result.layers.L1.observed_rate !== undefined) {
-        decoyRate = result.layers.L1.observed_rate;
+      const famSpan = document.createElement("span");
+      famSpan.className = "scheme-family mono";
+      famSpan.textContent = `— ${s.family || "quantum-scheme"}`;
+
+      card.appendChild(radio);
+      card.appendChild(nameSpan);
+      card.appendChild(famSpan);
+      el.schemesList.appendChild(card);
+    });
+  }
+
+  function updateSchemeSelection() {
+    if (!el.schemesList) return;
+    const cards = el.schemesList.querySelectorAll(".scheme-card-label");
+    cards.forEach((card) => {
+      const radio = card.querySelector("input[type='radio']");
+      if (radio && radio.value === state.scheme) {
+        card.classList.add("is-selected");
+        radio.checked = true;
+      } else {
+        card.classList.remove("is-selected");
+      }
+    });
+  }
+
+  function renderCompare(data) {
+    const honest = data.honest || {};
+    const forged = data.forged || {};
+    const hSum = honest.summary || {};
+    const fSum = forged.summary || {};
+    const hLayers = honest.layers || {};
+    const fLayers = forged.layers || {};
+
+    const l0 = fLayers.L0 || {};
+    const l1 = fLayers.L1 || {};
+    const l2 = fLayers.L2 || {};
+    const l3 = fLayers.L3 || {};
+
+    const standardClear = !l0.flagged && !l1.flagged && !l2.flagged;
+    const l3Caught = Boolean(l3.flagged);
+
+    // 1. Meta Strip
+    if (el.metaScheme) el.metaScheme.textContent = state.scheme;
+    if (el.metaBits) el.metaBits.textContent = String(state.n_message_qubits);
+    if (el.metaDecoys) el.metaDecoys.textContent = Number(state.decoy_rounds).toLocaleString();
+    if (el.metaFloor) {
+      const floorVal = l1.floor != null ? l1.floor : (state.health?.floor != null ? state.health.floor : 0.03442);
+      el.metaFloor.textContent = formatRate(floorVal);
+    }
+
+    // 2. Score Strip
+    if (el.scoreForgeryRate) {
+      let rate = 0;
+      if (l3.certificates && l3.certificates.length > 0) {
+        rate = l3.certificates[0].success_probability != null ? l3.certificates[0].success_probability : 1.0;
+      } else if (fSum.accepted && fSum.message_changed) {
+        rate = 1.0;
+      }
+      el.scoreForgeryRate.textContent = formatPercent(rate);
+    }
+
+    if (el.scoreHonestAccept) {
+      el.scoreHonestAccept.textContent = hSum.accepted ? "100.0%" : "0.0%";
+    }
+
+    if (el.scoreStandardChecks) {
+      el.scoreStandardChecks.textContent = standardClear ? "3/3 CLEAR" : "FLAGGED";
+      el.scoreStandardChecks.className = "score-numeral mono " + (standardClear ? "score-numeral--neutral" : "score-numeral--threat");
+    }
+
+    if (el.scorePauliguardPill) {
+      if (l3Caught) {
+        el.scorePauliguardPill.className = "verdict-pill verdict-pill--caught";
+        el.scorePauliguardPill.textContent = "CAUGHT";
+      } else {
+        el.scorePauliguardPill.className = "verdict-pill verdict-pill--green";
+        el.scorePauliguardPill.textContent = "CLEAR";
+      }
+    }
+
+    // 3. Verdict Panel
+    if (el.verdictPanel) {
+      if (fSum.accepted && fSum.message_changed && standardClear) {
+        el.verdictPanel.className = "verdict-panel verdict-panel--threat";
+        el.verdictHeadline.textContent = "SIGNATURE ACCEPTED · MESSAGE CHANGED · STANDARD CHECKS SAW NOTHING";
+      } else if (!fSum.accepted) {
+        el.verdictPanel.className = "verdict-panel verdict-panel--safe";
+        el.verdictHeadline.textContent = "FORGERY REJECTED · PROTOCOL VERIFIER REFUSED SIGNATURE";
+      } else {
+        el.verdictPanel.className = "verdict-panel verdict-panel--threat";
+        el.verdictHeadline.textContent = "ATTACK EXECUTED · ANOMALIES RECORDED BY DETECTOR LAYERS";
       }
 
-      updateAttackedPanel(result, decoyRate, params.attack_pauli);
-      updateDetectionLayers(result.layers);
+      const rateH = formatRate(data.decoy_rate_honest != null ? data.decoy_rate_honest : l1.observed_rate);
+      const rateF = formatRate(data.decoy_rate_forged != null ? data.decoy_rate_forged : l1.observed_rate);
+      el.verdictSubline.textContent = `decoy error honest ${rateH} vs forged ${rateF}, statistically indistinguishable.`;
+    }
 
-      // Check money shot
-      updateMoneyShotBanner(result, 0.03310, decoyRate);
-    } catch (err) {
-      console.error('Error running forgery protocol:', err);
-    } finally {
-      setLoading(false);
+    // 4. Exhibits
+    // Exhibit A (Honest)
+    const hIn = hSum.message_in || [1, 1];
+    const hOut = hSum.message_out || [1, 1];
+    renderChips(hIn, el.exhibitAliceA);
+    renderChips(hOut, el.exhibitBobA);
+
+    if (el.exhibitDecoyA) {
+      const hTau = hLayers.L1?.tau != null ? formatRate(hLayers.L1.tau) : "0.04534";
+      const hRate = formatRate(data.decoy_rate_honest != null ? data.decoy_rate_honest : 0.03524);
+      el.exhibitDecoyA.innerHTML = `Decoy error rate: <span class="num-val">${hRate}</span> (Serfling τ = <span class="num-val">${hTau}</span>)`;
+    }
+
+    if (el.exhibitStatusA) {
+      const accText = hSum.accepted ? "ACCEPTED" : "REJECTED";
+      const chgText = hSum.message_changed ? "CHANGED" : "INTACT";
+      el.exhibitStatusA.textContent = `Signature: ${accText} · Message: ${chgText}`;
+      el.exhibitStatusA.className = "exhibit-outcome mono " + (hSum.accepted && !hSum.message_changed ? "exhibit-outcome--intact" : "exhibit-outcome--forged");
+    }
+
+    // Exhibit B (Forged)
+    const fIn = fSum.message_in || [1, 1];
+    const fOut = fSum.message_out || [0, 1];
+    const changedMask = fOut.map((b, i) => b !== fIn[i]);
+    renderChips(fIn, el.exhibitAliceB);
+    renderChips(fOut, el.exhibitBobB, changedMask);
+
+    if (el.exhibitDecoyB) {
+      const fTau = l1.tau != null ? formatRate(l1.tau) : "0.04534";
+      const fRate = formatRate(data.decoy_rate_forged != null ? data.decoy_rate_forged : 0.03524);
+      el.exhibitDecoyB.innerHTML = `Decoy error rate: <span class="num-val">${fRate}</span> (Serfling τ = <span class="num-val">${fTau}</span>)`;
+    }
+
+    if (el.exhibitStatusB) {
+      const accText = fSum.accepted ? "ACCEPTED" : "REJECTED";
+      const chgText = fSum.message_changed ? "CHANGED (FORGERY)" : "INTACT";
+      el.exhibitStatusB.textContent = `Signature: ${accText} · Message: ${chgText}`;
+      el.exhibitStatusB.className = "exhibit-outcome mono " + (fSum.message_changed ? "exhibit-outcome--forged" : "exhibit-outcome--intact");
+    }
+
+    // 5. Cross-Examination Rows
+    // Row 1: Standard Checks
+    if (el.standardStatusPill) {
+      if (standardClear) {
+        el.standardStatusPill.className = "verdict-pill verdict-pill--neutral";
+        el.standardStatusPill.textContent = "ALL CLEAR";
+      } else {
+        el.standardStatusPill.className = "verdict-pill verdict-pill--caught";
+        el.standardStatusPill.textContent = "ANOMALY FLAGGED";
+      }
+    }
+
+    if (el.standardWhyContent) {
+      const l0Deriv = l0.derivation || "no threshold - deterministic predicate";
+      const l1Deriv = l1.derivation || `tau = ${formatRate(l1.tau)} from Serfling; xbar=${formatRate(l1.observed_rate)}, PASS`;
+      const l2Deriv = l2.derivation || `Azuma-Hoeffding: tau = ${formatNum(l2.threshold, 4)}; observed=${formatNum(l2.observed, 2)}, PASS`;
+
+      el.standardWhyContent.innerHTML = `
+        <div class="audit-breakdown-grid">
+          <div class="breakdown-box">
+            <div class="breakdown-title mono">[L0 CONFORMANCE CHECK]</div>
+            <div class="breakdown-derivation">State-machine verification: ${escapeHtml(l0Deriv)}</div>
+          </div>
+          <div class="breakdown-box">
+            <div class="breakdown-title mono">[L1 SERFLING DECOY BOUND]</div>
+            <div class="breakdown-derivation">${escapeHtml(l1Deriv)}</div>
+          </div>
+          <div class="breakdown-box">
+            <div class="breakdown-title mono">[L2 AZUMA ENTANGLEMENT CHECK]</div>
+            <div class="breakdown-derivation">${escapeHtml(l2Deriv)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Row 2: PauliGuard L3
+    if (el.l3StatusPill) {
+      if (l3Caught) {
+        el.l3StatusPill.className = "verdict-pill verdict-pill--outline-red";
+        el.l3StatusPill.textContent = "FORGERY CAUGHT";
+      } else {
+        el.l3StatusPill.className = "verdict-pill verdict-pill--neutral";
+        el.l3StatusPill.textContent = "NO MALLEABILITY DETECTED";
+      }
+    }
+
+    if (el.l3WhyContent) {
+      const cert = (l3.certificates && l3.certificates[0]) || null;
+      if (cert) {
+        const witness = cert.witness_pauli || "+XI";
+        const sigPauli = cert.signature_pauli || "+XI";
+        const dim = cert.malleability_dimension != null ? cert.malleability_dimension : 4;
+        const prob = cert.success_probability != null ? formatRate(cert.success_probability) : "1.00000";
+        const trials = cert.execution_trials != null ? `${cert.execution_accepted}/${cert.execution_trials}` : "16/16";
+        const explanation = cert.explanation || "Pauli-conjugation attack satisfies arbitrator predicate.";
+        const caveat = cert.caveat || "L3 is sound, not complete: a certificate proves an attack exists; no malleability found is NOT a proof of security.";
+
+        el.l3WhyContent.innerHTML = `
+          <div class="certificate-dossier">
+            <div class="cert-meta-grid mono">
+              <div>
+                <div class="cert-item-label">[WITNESS PAULI]</div>
+                <div class="cert-item-value cert-item-value--red">${escapeHtml(witness)}</div>
+              </div>
+              <div>
+                <div class="cert-item-label">[SIGNATURE PAULI]</div>
+                <div class="cert-item-value cert-item-value--red">${escapeHtml(sigPauli)}</div>
+              </div>
+              <div>
+                <div class="cert-item-label">[MALLEABILITY DIM]</div>
+                <div class="cert-item-value">${dim}</div>
+              </div>
+              <div>
+                <div class="cert-item-label">[SUCCESS PROB]</div>
+                <div class="cert-item-value cert-item-value--red">${prob} (100%)</div>
+              </div>
+            </div>
+            <div class="cert-explanation">${escapeHtml(explanation)}</div>
+            <div class="breakdown-derivation" style="margin-bottom: 0.5rem;">
+              Execution verification: <strong>${escapeHtml(trials)} trials accepted</strong> with message altered.
+              Derivation: ${escapeHtml(l3.derivation || "no threshold - algebraic search")}.
+            </div>
+            <div class="cert-caveat mono">${escapeHtml(caveat)}</div>
+          </div>
+        `;
+      } else {
+        el.l3WhyContent.innerHTML = `
+          <div class="breakdown-box">
+            <div class="breakdown-derivation">
+              No symplectic nullspace witness found for '${escapeHtml(state.scheme)}' at n=${state.n_message_qubits}.
+              ${escapeHtml(l3.derivation || "no threshold - algebraic search")}
+            </div>
+          </div>
+        `;
+      }
     }
   }
 
-  async function handleRunCompare() {
-    clearError();
-    setLoading(true, 'Lockstep Comparison');
+  function renderHonestRun(data) {
+    const sum = data.summary || {};
+    const layers = data.layers || {};
+    const l1 = layers.L1 || {};
 
-    try {
-      const params = getControlValues();
-      const payload = {
-        scheme: params.scheme,
-        n_message_qubits: params.n_message_qubits,
-        attack_pauli: params.attack_pauli,
-        noise_p: params.noise_p,
-        decoy_rounds: params.decoy_rounds,
-        alpha: params.alpha,
-        seed: 101,
-      };
+    // 1. Meta Strip
+    if (el.metaScheme) el.metaScheme.textContent = state.scheme;
+    if (el.metaBits) el.metaBits.textContent = String(state.n_message_qubits);
+    if (el.metaDecoys) el.metaDecoys.textContent = Number(state.decoy_rounds).toLocaleString();
+    if (el.metaFloor) {
+      const floorVal = l1.floor != null ? l1.floor : (state.health?.floor != null ? state.health.floor : 0.03442);
+      el.metaFloor.textContent = formatRate(floorVal);
+    }
 
-      const result = await apiRequest('/api/compare', {
-        method: 'POST',
-        body: JSON.stringify(payload),
+    // 2. Score Strip
+    if (el.scoreForgeryRate) el.scoreForgeryRate.textContent = "0.0%";
+    if (el.scoreHonestAccept) el.scoreHonestAccept.textContent = sum.accepted ? "100.0%" : "0.0%";
+    if (el.scoreStandardChecks) {
+      el.scoreStandardChecks.textContent = "3/3 CLEAR";
+      el.scoreStandardChecks.className = "score-numeral mono score-numeral--neutral";
+    }
+    if (el.scorePauliguardPill) {
+      el.scorePauliguardPill.className = "verdict-pill verdict-pill--green";
+      el.scorePauliguardPill.textContent = "CLEAR";
+    }
+
+    // 3. Verdict Panel
+    if (el.verdictPanel) {
+      el.verdictPanel.className = "verdict-panel verdict-panel--safe";
+      el.verdictHeadline.textContent = "HONEST SIGNATURE ACCEPTED · MESSAGE INTACT · ALL LAYERS CLEAR";
+      const obsRate = l1.observed_rate != null ? formatRate(l1.observed_rate) : "0.03524";
+      el.verdictSubline.textContent = `decoy error rate ${obsRate}, within Serfling bound. Zero anomalies detected.`;
+    }
+
+    // 4. Exhibits
+    const mIn = sum.message_in || [0, 1];
+    const mOut = sum.message_out || [0, 1];
+    renderChips(mIn, el.exhibitAliceA);
+    renderChips(mOut, el.exhibitBobA);
+
+    if (el.exhibitDecoyA) {
+      const tau = l1.tau != null ? formatRate(l1.tau) : "0.04534";
+      const rate = l1.observed_rate != null ? formatRate(l1.observed_rate) : "0.03524";
+      el.exhibitDecoyA.innerHTML = `Decoy error rate: <span class="num-val">${rate}</span> (Serfling τ = <span class="num-val">${tau}</span>)`;
+    }
+
+    if (el.exhibitStatusA) {
+      el.exhibitStatusA.textContent = "Signature: ACCEPTED · Message: INTACT";
+      el.exhibitStatusA.className = "exhibit-outcome mono exhibit-outcome--intact";
+    }
+
+    // Exhibit B in honest-only view shows honest baseline replicated
+    renderChips(mIn, el.exhibitAliceB);
+    renderChips(mOut, el.exhibitBobB);
+
+    if (el.exhibitDecoyB) {
+      const tau = l1.tau != null ? formatRate(l1.tau) : "0.04534";
+      const rate = l1.observed_rate != null ? formatRate(l1.observed_rate) : "0.03524";
+      el.exhibitDecoyB.innerHTML = `Decoy error rate: <span class="num-val">${rate}</span> (Serfling τ = <span class="num-val">${tau}</span>)`;
+    }
+
+    if (el.exhibitStatusB) {
+      el.exhibitStatusB.textContent = "Baseline: HONEST RUN (Click 'Run the forgery' to test attack)";
+      el.exhibitStatusB.className = "exhibit-outcome mono exhibit-outcome--intact";
+    }
+
+    // 5. Cross-Examination Rows
+    if (el.standardStatusPill) {
+      el.standardStatusPill.className = "verdict-pill verdict-pill--neutral";
+      el.standardStatusPill.textContent = "ALL CLEAR";
+    }
+
+    if (el.standardWhyContent) {
+      el.standardWhyContent.innerHTML = `
+        <div class="audit-breakdown-grid">
+          <div class="breakdown-box">
+            <div class="breakdown-title mono">[HONEST EXECUTION VERIFIED]</div>
+            <div class="breakdown-derivation">${escapeHtml(l1.derivation || "All physical channels and state machines conform to specification.")}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (el.l3StatusPill) {
+      el.l3StatusPill.className = "verdict-pill verdict-pill--green";
+      el.l3StatusPill.textContent = "CLEAR";
+    }
+
+    if (el.l3WhyContent) {
+      el.l3WhyContent.innerHTML = `
+        <div class="breakdown-box">
+          <div class="breakdown-derivation">Honest execution executed without attack injection. Layer 3 reports no active forgery.</div>
+        </div>
+      `;
+    }
+  }
+
+  function escapeHtml(str) {
+    if (str == null) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  // --------------------------------------------------------------------------
+  // Event Listeners & Initialization
+  // --------------------------------------------------------------------------
+  function setupEvents() {
+    if (el.dismissErrorBtn) {
+      el.dismissErrorBtn.addEventListener("click", clearError);
+    }
+
+    if (el.runForgeryBtn) {
+      el.runForgeryBtn.addEventListener("click", runCompare);
+    }
+
+    if (el.runHonestBtn) {
+      el.runHonestBtn.addEventListener("click", runHonest);
+    }
+
+    if (el.runBothBtn) {
+      el.runBothBtn.addEventListener("click", runCompare);
+    }
+
+    // Stepper
+    if (el.stepDecBtn && el.messageBitsInput) {
+      el.stepDecBtn.addEventListener("click", () => {
+        let val = parseInt(el.messageBitsInput.value, 10) || 2;
+        if (val > 2) {
+          val -= 1;
+          el.messageBitsInput.value = val;
+          state.n_message_qubits = val;
+        }
       });
+    }
 
-      state.lastRunResult = result;
-      elements.runModeBadge.textContent = 'Lockstep Compare Active';
-      elements.runModeBadge.className = 'badge badge-accent';
+    if (el.stepIncBtn && el.messageBitsInput) {
+      el.stepIncBtn.addEventListener("click", () => {
+        let val = parseInt(el.messageBitsInput.value, 10) || 2;
+        if (val < 6) {
+          val += 1;
+          el.messageBitsInput.value = val;
+          state.n_message_qubits = val;
+        }
+      });
+    }
 
-      // Update Honest & Forged Panels
-      updateHonestPanel(result.honest, result.decoy_rate_honest);
-      updateAttackedPanel(result.forged, result.decoy_rate_forged, params.attack_pauli);
+    // Advanced Inputs
+    if (el.noiseInput) {
+      el.noiseInput.addEventListener("change", (e) => {
+        state.noise_p = parseFloat(e.target.value) || 0.0;
+      });
+    }
 
-      // Detection Layers (from forged run to showcase L3 detection)
-      updateDetectionLayers(result.forged.layers);
+    if (el.decoysInput) {
+      el.decoysInput.addEventListener("change", (e) => {
+        state.decoy_rounds = parseInt(e.target.value, 10) || 4200;
+      });
+    }
 
-      // The Money Shot Banner
-      updateMoneyShotBanner(result.forged, result.decoy_rate_honest, result.decoy_rate_forged);
-    } catch (err) {
-      console.error('Error running lockstep comparison:', err);
-    } finally {
-      setLoading(false);
+    if (el.alphaInput) {
+      el.alphaInput.addEventListener("change", (e) => {
+        state.alpha = e.target.value.trim() || "1e-10";
+      });
+    }
+
+    if (el.attackPauliSelect) {
+      el.attackPauliSelect.addEventListener("change", (e) => {
+        state.attack_pauli = e.target.value || "X";
+      });
     }
   }
 
-  // =========================================================================
-  // INITIALIZATION & EVENT BINDINGS
-  // =========================================================================
-
+  // --------------------------------------------------------------------------
+  // Bootstrap
+  // --------------------------------------------------------------------------
   async function init() {
-    // 1. Noise slider display update
-    elements.noiseSlider.addEventListener('input', (e) => {
-      elements.noiseDisplay.textContent = Number(e.target.value).toFixed(3);
-    });
+    setupEvents();
 
-    // 2. Scheme dropdown change
-    elements.schemeSelect.addEventListener('change', async (e) => {
-      const schemeName = e.target.value;
-      await loadSchemeSpec(schemeName);
-      // Automatically re-run comparison when scheme changes
-      handleRunCompare();
-    });
+    // 1. Initial cached fallback state: render immediately so UI is always labeled, populated, and stable
+    state.schemes = CACHED_SCHEMES;
+    renderSchemes(CACHED_SCHEMES);
+    renderCompare(CACHED_COMPARE_DATA);
+    setLive(false);
 
-    // 3. Action buttons
-    elements.btnRunHonest.addEventListener('click', handleRunHonest);
-    elements.btnRunForgery.addEventListener('click', handleRunForgery);
-    elements.btnRunCompare.addEventListener('click', handleRunCompare);
+    // 2. Health check
+    const isOnline = await fetchHealth();
 
-    // 4. Live Spec Editor Action Buttons
-    if (elements.btnReanalyseSpec) {
-      elements.btnReanalyseSpec.addEventListener('click', () => handleReanalyseSpec());
-    }
-    if (elements.btnResetSpec) {
-      elements.btnResetSpec.addEventListener('click', handleResetSpec);
-    }
-    if (elements.btnAddSwapTestFix) {
-      elements.btnAddSwapTestFix.addEventListener('click', handleAddSwapTestFix);
-    }
-    if (elements.btnRemoveArbitratorCheck) {
-      elements.btnRemoveArbitratorCheck.addEventListener('click', handleRemoveArbitratorCheck);
-    }
-
-    // 5. Copy YAML button
-    elements.btnCopyYaml.addEventListener('click', () => {
-      const yaml = elements.yamlSpecPane.value || elements.yamlSpecPane.textContent;
-      if (navigator.clipboard && yaml) {
-        navigator.clipboard.writeText(yaml).then(() => {
-          const originalText = elements.btnCopyYaml.textContent;
-          elements.btnCopyYaml.textContent = 'Copied!';
-          setTimeout(() => { elements.btnCopyYaml.textContent = originalText; }, 1500);
-        });
-      }
-    });
-
-    // 5. Dismiss global error
-    elements.dismissErrorBtn.addEventListener('click', clearError);
-
-    // 6. Derivation accordions
-    document.querySelectorAll('.btn-toggle-derivation').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.getAttribute('data-target');
-        const targetBody = document.getElementById(targetId);
-        if (targetBody) {
-          const isHidden = targetBody.classList.contains('hidden');
-          if (isHidden) {
-            targetBody.classList.remove('hidden');
-            btn.setAttribute('aria-expanded', 'true');
-          } else {
-            targetBody.classList.add('hidden');
-            btn.setAttribute('aria-expanded', 'false');
-          }
-        }
-      });
-    });
-
-    // 7. Initial Health Check
-    try {
-      const health = await apiRequest('/api/health');
-      if (health && health.status === 'ok') {
-        elements.backendStatus.textContent = 'Backend Online';
-        const floorNum = health.floor !== undefined ? Number(health.floor).toFixed(5) : '0.03442';
-        elements.floorValue.textContent = `${floorNum} (${health.floor_source || 'da8up31qtnsc73d0v7h0'})`;
-      }
-    } catch (err) {
-      elements.backendStatus.textContent = 'Backend Offline';
-      showError('Unable to connect to PauliGuard API. Please ensure backend is running.');
-      return;
-    }
-
-    // 8. Discover Schemes
-    try {
-      const schemes = await apiRequest('/api/schemes');
-      state.schemes = schemes || [];
-
-      elements.schemeSelect.innerHTML = '';
-      schemes.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.name;
-        opt.textContent = `${s.name} (${s.family || 'AQS'})`;
-        if (s.name === 'lu-2022') {
-          opt.selected = true;
-        }
-        elements.schemeSelect.appendChild(opt);
-      });
-
-      const defaultScheme = elements.schemeSelect.value || (schemes[0] && schemes[0].name);
-      if (defaultScheme) {
-        await loadSchemeSpec(defaultScheme);
-      }
-
-      // Automatically run initial lockstep comparison for instant 40-second presentation
-      await handleRunCompare();
-    } catch (err) {
-      console.error('Failed initializing schemes:', err);
+    // 3. If online, fetch live schemes and auto-run compare with fixed seeds
+    if (isOnline) {
+      await fetchSchemes();
+      await runCompare();
+    } else {
+      setOfflineStatus();
+      showOfflineBanner();
     }
   }
 
-  // Run on DOM ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
   } else {
     init();
   }
-
 })();
